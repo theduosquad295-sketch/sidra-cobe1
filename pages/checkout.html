@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SIDRA COBE checkout page." />
+    <title>SIDRA COBE | Checkout</title>
+    <style>
+      :root {
+        --bg: #f7f5f2;
+        --surface: #ffffff;
+        --surface-soft: #f7f7f5;
+        --line: #ece7e1;
+        --text: #1a1a1a;
+        --muted: #666666;
+        --primary: #111111;
+        --primary-soft: #f4f1ed;
+        --success: #1d7a43;
+        --danger: #d33d4a;
+        --shadow: 0 18px 38px rgba(17, 17, 17, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      a { color: inherit; text-decoration: none; }
+      button, input { font: inherit; }
+      img { max-width: 100%; display: block; }
+      button { cursor: pointer; }
+      .container { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255,255,255,0.96);
+        border-bottom: 1px solid rgba(17,17,17,0.06);
+        backdrop-filter: blur(10px);
+      }
+
+      .header-row {
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        align-items: center;
+        min-height: 72px;
+        gap: 10px;
+      }
+
+      .back-link {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: var(--primary-soft);
+        color: var(--text);
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--text);
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        object-fit: cover;
+      }
+
+      .brand-text {
+        font-size: 0.72rem;
+      }
+
+      .header-icon {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: var(--primary-soft);
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header-icon svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      .cart-count,
+      .wishlist-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 16px;
+        height: 16px;
+        display: grid;
+        place-items: center;
+        padding: 2px 4px;
+        border-radius: 999px;
+        background: var(--text);
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 800;
+      }
+
+      .checkout-page {
+        padding: 18px 0 110px;
+      }
+
+      .checkout-shell {
+        display: grid;
+        gap: 18px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .section-label {
+        display: block;
+        margin-bottom: 12px;
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .address-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .saved-address {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 14px 16px;
+      }
+
+      .saved-address-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .saved-address strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 1rem;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .link-btn,
+      .ghost-btn {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 10px;
+        min-height: 38px;
+        padding: 0 12px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .primary-btn,
+      .checkout-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        border: none;
+        border-radius: 14px;
+        background: var(--text);
+        color: #fff;
+        font-weight: 800;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .field label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .field input {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface-soft);
+        padding: 0 12px;
+        color: var(--text);
+      }
+
+      .field input:focus {
+        outline: 2px solid rgba(17,17,17,0.08);
+      }
+
+      .error {
+        color: var(--danger);
+        font-size: 0.72rem;
+        display: none;
+      }
+
+      .error.visible {
+        display: block;
+      }
+
+      .section-block {
+        display: grid;
+        gap: 14px;
+      }
+
+      .order-item {
+        display: grid;
+        grid-template-columns: 92px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+      }
+
+      .order-item + .order-item {
+        border-top: 1px solid var(--line);
+      }
+
+      .item-image {
+        width: 92px;
+        height: 92px;
+        border-radius: 16px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .item-name {
+        margin: 0;
+        font-size: 0.98rem;
+        font-weight: 700;
+      }
+
+      .item-meta {
+        color: var(--muted);
+        font-size: 0.76rem;
+      }
+
+      .item-total {
+        font-size: 0.9rem;
+        font-weight: 800;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .summary-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .summary-row.total {
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+        color: var(--text);
+        font-size: 1.05rem;
+        font-weight: 800;
+      }
+
+      .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-soft);
+        padding: 12px 14px;
+      }
+
+      .payment-option input {
+        accent-color: var(--text);
+      }
+
+      .payment-title {
+        display: block;
+        font-weight: 700;
+      }
+
+      .checkout-footer {
+        margin-top: 10px;
+      }
+
+      @media (min-width: 700px) {
+        .container {
+          max-width: 980px;
+          padding: 0 20px;
+        }
+
+        .checkout-shell {
+          grid-template-columns: 1.2fr 0.8fr;
+          align-items: start;
+        }
+
+        .field-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .field.full-width {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <a href="../index.html" class="back-link" aria-label="Back to home">←</a>
+
+        <a href="../index.html" class="brand" aria-label="SIDRA COBE home">
+          <img class="brand-logo" src="../images/logo/logo.jpg" alt="SIDRA COBE logo" />
+          <span class="brand-text">SIDRA COBE</span>
+        </a>
+
+        <button class="header-icon cart-button" type="button" aria-label="Cart" data-cart-page="cart.html">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a2 2 0 110 4 2 2 0 010-4zm10 0a2 2 0 110 4 2 2 0 010-4zM6.2 6h14.6l-1.9 7.6a2 2 0 01-2 1.6H9.1a2 2 0 01-2-1.6L5.2 4H2V2h4l.5 2z" /></svg>
+          <span class="cart-count">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="checkout-page">
+      <div class="container">
+        <div class="checkout-shell">
+          <section class="card">
+            <div class="section-label">Delivery Address</div>
+
+            <div class="address-card">
+              <button id="add-address-btn" type="button" class="ghost-btn">+ Add Address</button>
+
+              <div id="saved-address-box" class="saved-address hidden">
+                <div class="saved-address-header">
+                  <strong>Saved Address</strong>
+                  <button id="change-address-btn" type="button" class="link-btn">Change</button>
+                </div>
+                <div id="saved-address-text" class="muted">No saved address available.</div>
+              </div>
+
+              <div id="address-form" class="section-block">
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="full-name">Name</label>
+                    <input id="full-name" type="text" placeholder="Enter your name" />
+                    <span id="full-name-error" class="error">Name is required.</span>
+                  </div>
+
+                  <div class="field">
+                    <label for="mobile">Phone</label>
+                    <input id="mobile" type="tel" placeholder="Enter phone number" />
+                    <span id="mobile-error" class="error">Phone is required.</span>
+                  </div>
+
+                  <div class="field full-width">
+                    <label for="house">Full Address</label>
+                    <input id="house" type="text" placeholder="House no., street, area" />
+                    <span id="house-error" class="error">Address is required.</span>
+                  </div>
+
+                  <div class="field">
+                    <label for="street">Street / Area</label>
+                    <input id="street" type="text" placeholder="Street / Area" />
+                    <span id="street-error" class="error">Street / Area is required.</span>
+                  </div>
+
+                  <div class="field">
+                    <label for="city">City</label>
+                    <input id="city" type="text" placeholder="City" />
+                    <span id="city-error" class="error">City is required.</span>
+                  </div>
+
+                  <div class="field">
+                    <label for="state">State</label>
+                    <input id="state" type="text" placeholder="State" />
+                    <span id="state-error" class="error">State is required.</span>
+                  </div>
+
+                  <div class="field">
+                    <label for="pin">PIN Code</label>
+                    <input id="pin" type="text" placeholder="PIN code" />
+                    <span id="pin-error" class="error">PIN code is required.</span>
+                  </div>
+
+                  <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" placeholder="Email (optional)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="checkout-footer">
+              <div class="section-label" style="margin-top: 18px;">Payment Method</div>
+              <label class="payment-option">
+                <input type="radio" name="payment-method" value="Cash on Delivery" checked />
+                <span>
+                  <span class="payment-title">Cash on Delivery</span>
+                  <span class="muted">Pay when your order is delivered.</span>
+                </span>
+              </label>
+              <div id="payment-error" class="error visible" style="margin-top: 8px;">Please choose a payment method.</div>
+            </div>
+          </section>
+
+          <aside class="card">
+            <div class="section-label">Your Items</div>
+            <div id="summary-items" class="section-block"></div>
+
+            <div class="section-label" style="margin-top: 18px;">Order Summary</div>
+            <div class="summary-list">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <strong id="subtotal">₹0</strong>
+              </div>
+              <div class="summary-row">
+                <span>Delivery</span>
+                <strong id="shipping">₹0</strong>
+              </div>
+              <div class="summary-row">
+                <span>Discount</span>
+                <strong id="discount">-₹0</strong>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <strong id="total">₹0</strong>
+              </div>
+            </div>
+
+            <div style="margin-top: 18px;">
+              <button id="place-order" type="button" class="checkout-btn">Place Order</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/firebase-web-init.js"></script>
+    <script>
+      (function () {
+        const CART_KEYS = ["sidraCobeCart", "sidraCart", "sidra-cobe-cart", "cartData"];
+        const BUY_NOW_KEY = "sidraCobeBuyNow";
+        const ORDER_KEY = "sidraCobeOrders";
+        const ADDRESS_KEY = "sidraCobeAddresses";
+        const ADMIN_NOTIFICATION_KEY = "sidraCobeAdminNotifications";
+
+        function safeNumber(value) {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function formatCurrency(value) {
+          return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(safeNumber(value));
+        }
+
+        function readJSON(key, fallback) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+          } catch (error) {
+            return fallback;
+          }
+        }
+
+        function saveJSON(key, value) {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function readAddresses() {
+          const saved = readJSON(ADDRESS_KEY, []);
+          return Array.isArray(saved) ? saved : [];
+        }
+
+        function getCheckoutState() {
+          const buyNow = readJSON(BUY_NOW_KEY, null);
+          if (buyNow && buyNow.product) return buyNow;
+
+          for (const key of CART_KEYS) {
+            try {
+              const raw = localStorage.getItem(key);
+              if (!raw) continue;
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length) {
+                const firstItem = parsed[0];
+                return { product: firstItem, quantity: safeNumber(firstItem.quantity) || 1 };
+              }
+            } catch (error) {}
+          }
+
+          return null;
+        }
+
+        function getItemImagePath(item) {
+          const imageClass = item?.imageClass || "media-one";
+          if (window.getSidraImagePath) {
+            return window.getSidraImagePath(imageClass);
+          }
+          const map = {
+            "media-one": "../images/products/shirt1.jpg",
+            "media-two": "../images/products/shoes1.jpg",
+            "media-three": "../images/products/ladies-purse1.jpg",
+            "media-four": "../images/products/sunglasses1.jpg",
+            "media-five": "../images/products/hoodie1.jpg",
+            "media-six": "../images/products/bag1.jpg",
+            "media-seven": "../images/products/tshirt1.jpg",
+            "media-eight": "../images/products/watch1.jpg"
+          };
+          return map[imageClass] || map["media-one"];
+        }
+
+        function showSavedAddressSummary() {
+          const addresses = readAddresses();
+          const box = document.getElementById("saved-address-box");
+          const text = document.getElementById("saved-address-text");
+
+          if (!addresses.length) {
+            box.classList.add("hidden");
+            return;
+          }
+
+          const address = addresses[0];
+          const summary = `${address.fullName || "Customer"}\n${address.mobile || "Phone not added"}\n${[address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join(", ") || "Address not added"}`;
+          text.textContent = summary.replace(/\n/g, " | ");
+          box.classList.remove("hidden");
+        }
+
+        function applySavedAddress(index) {
+          const addresses = readAddresses();
+          const address = addresses[Number(index)];
+          if (!address) return;
+          document.getElementById("full-name").value = address.fullName || "";
+          document.getElementById("mobile").value = address.mobile || "";
+          document.getElementById("house").value = address.house || "";
+          document.getElementById("street").value = address.street || "";
+          document.getElementById("city").value = address.city || "";
+          document.getElementById("state").value = address.state || "";
+          document.getElementById("pin").value = address.pin || "";
+          document.getElementById("email").value = address.email || "";
+        }
+
+        function renderSummary() {
+          const state = getCheckoutState();
+          const item = state?.product || null;
+          const qty = safeNumber(state?.quantity || 1);
+
+          if (!item) {
+            document.getElementById("summary-items").innerHTML = '<div class="muted">No item selected for checkout.</div>';
+            return;
+          }
+
+          const itemTotal = safeNumber(item.price) * qty;
+          const subtotal = itemTotal;
+          const shipping = subtotal >= 2200 ? 0 : 199;
+          const discount = subtotal > 0 ? Math.min(Math.round(subtotal * 0.08), 500) : 0;
+          const total = subtotal + shipping - discount;
+
+          document.getElementById("subtotal").textContent = formatCurrency(subtotal);
+          document.getElementById("shipping").textContent = formatCurrency(shipping);
+          document.getElementById("discount").textContent = "-" + formatCurrency(discount);
+          document.getElementById("total").textContent = formatCurrency(total);
+
+          const imagePath = getItemImagePath(item);
+          document.getElementById("summary-items").innerHTML = `
+            <article class="order-item">
+              <div class="item-image" style="background-image: linear-gradient(135deg, rgba(17,17,17,0.08), rgba(17,17,17,0.04)), url('${imagePath}')"></div>
+              <div>
+                <p class="item-name">${item.name || "Product"}</p>
+                <div class="item-meta">Qty: ${qty}</div>
+                <div class="item-meta">${item.category || "Featured"}</div>
+              </div>
+              <div class="item-total">${formatCurrency(itemTotal)}</div>
+            </article>
+          `;
+
+          document.body.dataset.orderTotal = String(total);
+          document.body.dataset.productName = item.name || "Product";
+          document.body.dataset.productImage = item.imageClass || "media-one";
+        }
+
+        function clearErrors() {
+          document.querySelectorAll(".error").forEach((node) => node.classList.remove("visible"));
+        }
+
+        function validate() {
+          clearErrors();
+          let valid = true;
+
+          const fields = [
+            ["full-name", "full-name-error"],
+            ["mobile", "mobile-error"],
+            ["house", "house-error"],
+            ["street", "street-error"],
+            ["city", "city-error"],
+            ["state", "state-error"],
+            ["pin", "pin-error"]
+          ];
+
+          fields.forEach(([fieldId, errorId]) => {
+            const value = document.getElementById(fieldId).value.trim();
+            if (!value) {
+              document.getElementById(errorId).classList.add("visible");
+              valid = false;
+            }
+          });
+
+          const paymentSelected = document.querySelector('input[name="payment-method"]:checked');
+          if (!paymentSelected) {
+            document.getElementById("payment-error").classList.add("visible");
+            valid = false;
+          } else {
+            document.getElementById("payment-error").classList.remove("visible");
+          }
+
+          const state = getCheckoutState();
+          if (!state || !state.product) {
+            valid = false;
+          }
+
+          return valid;
+        }
+
+        function buildOrder() {
+          const state = getCheckoutState();
+          const item = state?.product;
+          const qty = safeNumber(state?.quantity || 1);
+          const total = safeNumber(document.body.dataset.orderTotal || 0);
+          const payment = document.querySelector('input[name="payment-method"]:checked')?.value || "Cash on Delivery";
+          const orderNumber = "SIDRA-" + Date.now().toString().slice(-6);
+          const orderDate = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+          const address = {
+            fullName: document.getElementById("full-name").value.trim(),
+            mobile: document.getElementById("mobile").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            house: document.getElementById("house").value.trim(),
+            street: document.getElementById("street").value.trim(),
+            city: document.getElementById("city").value.trim(),
+            state: document.getElementById("state").value.trim(),
+            pin: document.getElementById("pin").value.trim()
+          };
+
+          return {
+            orderNumber,
+            date: orderDate,
+            products: `${item?.name || "Product"}`,
+            productName: item?.name || "Product",
+            productImage: item?.imageClass || "media-one",
+            quantity: qty,
+            total: formatCurrency(total),
+            subtotal: formatCurrency(safeNumber(item?.price) * qty),
+            paymentStatus: payment,
+            paymentMethod: payment,
+            status: "Confirmed",
+            statusClass: "",
+            address,
+            itemId: String(item?.id || ""),
+            totalValue: total,
+            createdAt: new Date().toISOString()
+          };
+        }
+
+        function createAdminNotification(order) {
+          const customerName = (order?.address?.fullName || "Customer").trim() || "Customer";
+          const productName = order?.productName || order?.products || "Product";
+          const quantity = safeNumber(order?.quantity || 0);
+          const orderDateTime = new Date().toISOString();
+          const notification = {
+            id: "admin-notification-" + Date.now(),
+            type: "new_order",
+            title: "New Order Received",
+            orderId: order?.orderNumber || "SIDRA-0000",
+            customerName,
+            productName,
+            quantity,
+            orderTotal: safeNumber(order?.totalValue || order?.total || 0),
+            orderDateTime,
+            createdAt: orderDateTime,
+            status: "queued",
+            recipient: "admin",
+            message: "New Order Received - " + (order?.orderNumber || "SIDRA-0000") + " for " + productName + " by " + customerName
+          };
+
+          const notifications = readJSON(ADMIN_NOTIFICATION_KEY, []);
+          const nextNotifications = Array.isArray(notifications) ? [notification, ...notifications] : [notification];
+          saveJSON(ADMIN_NOTIFICATION_KEY, nextNotifications);
+          return notification;
+        }
+
+        function finalizeOrder() {
+          if (!validate()) return;
+
+          const order = buildOrder();
+          const orders = readJSON(ORDER_KEY, []);
+          const nextOrders = Array.isArray(orders) ? [order, ...orders] : [order];
+          saveJSON(ORDER_KEY, nextOrders);
+
+          createAdminNotification(order);
+          localStorage.setItem("sidraCobeLastOrder", JSON.stringify(order));
+          localStorage.removeItem(BUY_NOW_KEY);
+
+          if (window.sidraSendOrderEventToBackend) {
+            window.sidraSendOrderEventToBackend(order).catch(function () {
+              // Backend call intentionally remains separate from the checkout page flow.
+            });
+          }
+
+          if (window.sidraRegisterFirebaseMessaging) {
+            window.sidraRegisterFirebaseMessaging({
+              onResult: function (result) {
+                if (result && result.token) {
+                  localStorage.setItem("sidraCobeAdminFcmTokenForOrder", result.token);
+                }
+              }
+            });
+          }
+
+          window.location.href = "order-success.html";
+        }
+
+        function updateCartBadges() {
+          const cart = readJSON(CART_KEYS[0], []);
+          const total = Array.isArray(cart) ? cart.reduce((sum, item) => sum + safeNumber(item.quantity), 0) : 0;
+          document.querySelectorAll(".cart-count").forEach((node) => { node.textContent = String(total); });
+        }
+
+        function initialize() {
+          renderSummary();
+          showSavedAddressSummary();
+
+          const savedAddressSelect = document.getElementById("saved-address-select");
+          if (savedAddressSelect) {
+            savedAddressSelect.addEventListener("change", (event) => {
+              const index = event.target.value;
+              if (index !== "") applySavedAddress(index);
+            });
+          }
+
+          document.getElementById("change-address-btn").addEventListener("click", () => {
+            document.getElementById("saved-address-box").classList.add("hidden");
+            document.getElementById("address-form").scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+
+          document.getElementById("add-address-btn").addEventListener("click", () => {
+            document.getElementById("saved-address-box").classList.add("hidden");
+            ["full-name", "mobile", "house", "street", "city", "state", "pin", "email"].forEach((id) => {
+              document.getElementById(id).value = "";
+            });
+            document.getElementById("address-form").scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+
+          document.getElementById("place-order").addEventListener("click", finalizeOrder);
+          updateCartBadges();
+        }
+
+        initialize();
+      })();
+    </script>
+  </body>
+</html>

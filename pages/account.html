@@ -1,0 +1,630 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIDRA COBE | Account</title>
+    <style>
+      :root {
+        --primary: #111111;
+        --primary-soft: #f4f1ed;
+        --surface: #ffffff;
+        --background: #f7f4f1;
+        --line: #eae4dd;
+        --text: #1a1a1a;
+        --muted: #666666;
+        --shadow: 0 16px 34px rgba(17, 17, 17, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { color: inherit; text-decoration: none; }
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      img { max-width: 100%; display: block; }
+
+      .container { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.96);
+        border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+        backdrop-filter: blur(8px);
+      }
+
+      .header-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        gap: 12px;
+        min-height: 72px;
+      }
+
+      .brand {
+        justify-self: center;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text);
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-logo {
+        width: 34px;
+        height: 34px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      .brand-text {
+        font-size: 0.8rem;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .icon-button {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-soft);
+        border: 1px solid var(--line);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text);
+      }
+
+      .icon-button svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      .cart-count, .wishlist-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 16px;
+        height: 16px;
+        display: grid;
+        place-items: center;
+        padding: 2px 5px;
+        border-radius: 999px;
+        background: var(--text);
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 800;
+      }
+
+      .account-page {
+        padding: 20px 0 92px;
+      }
+
+      .profile-shell {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 28px;
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .back-home {
+        color: var(--text);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .profile-title {
+        margin: 0;
+        text-align: center;
+        font-size: 1.2rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text);
+        flex: 1;
+      }
+
+      .profile-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .orders-box {
+        margin-top: 18px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .profile-order {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+        padding: 12px 14px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .profile-order strong {
+        font-size: 0.96rem;
+      }
+
+      .profile-order small {
+        color: var(--muted);
+      }
+
+      .profile-option {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface);
+        box-shadow: 0 10px 22px rgba(17, 17, 17, 0.02);
+        padding: 16px 16px;
+        color: var(--text);
+        text-align: left;
+      }
+
+      .option-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: var(--primary-soft);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        color: var(--text);
+        flex-shrink: 0;
+      }
+
+      .option-label {
+        flex: 1;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .chevron {
+        font-size: 1.4rem;
+        color: var(--muted);
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 17, 17, 0.46);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 50;
+      }
+
+      .modal.hidden {
+        display: none;
+      }
+
+      .modal-card {
+        width: min(100%, 480px);
+        background: var(--surface);
+        border-radius: 24px 24px 0 0;
+        padding: 20px 18px 22px;
+        box-shadow: var(--shadow);
+      }
+
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .modal-head h3 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .close-btn {
+        border: none;
+        background: var(--primary-soft);
+        border-radius: 10px;
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+      }
+
+      .lang-list, .star-row {
+        display: grid;
+        gap: 10px;
+      }
+
+      .lang-option, .star-btn {
+        border: 1px solid var(--line);
+        background: var(--background);
+        color: var(--text);
+        border-radius: 14px;
+        min-height: 48px;
+        padding: 0 14px;
+        text-align: left;
+        font-weight: 700;
+      }
+
+      .lang-option.is-selected {
+        background: var(--primary-soft);
+        border-color: rgba(17, 17, 17, 0.12);
+      }
+
+      .star-row {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        margin-top: 8px;
+      }
+
+      .star-btn {
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        background: var(--background);
+      }
+
+      .star-btn.is-active {
+        background: #fff7d9;
+        border-color: #f6d76d;
+      }
+
+      .rating-note {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 90px;
+        transform: translateX(-50%) translateY(10px);
+        background: rgba(17, 17, 17, 0.92);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s ease;
+        z-index: 60;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      @media (min-width: 600px) {
+        .container { max-width: 560px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <button class="icon-button account-button" type="button" aria-label="Account" data-account-page="account.html">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z" />
+          </svg>
+        </button>
+
+        <a href="../index.html" class="brand" aria-label="SIDRA COBE home">
+          <img class="brand-logo" src="../images/logo/logo.jpg" alt="SIDRA COBE logo" />
+          <span class="brand-text">SIDRA COBE</span>
+        </a>
+
+        <div class="header-actions">
+          <button class="icon-button wishlist-button" type="button" aria-label="Wishlist" data-wishlist-page="wishlist.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 016.5 4c1.74 0 3.41.81 4.5 2.09A6.08 6.08 0 0115.5 4 4.5 4.5 0 0120 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+            <span class="wishlist-count">0</span>
+          </button>
+
+          <button class="icon-button cart-button" type="button" aria-label="Cart" data-cart-page="cart.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 18a2 2 0 110 4 2 2 0 010-4zm10 0a2 2 0 110 4 2 2 0 010-4zM6.2 6h14.6l-1.9 7.6a2 2 0 01-2 1.6H9.1a2 2 0 01-2-1.6L5.2 4H2V2h4l.5 2z" />
+            </svg>
+            <span class="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="account-page">
+      <div class="container profile-shell">
+        <div class="profile-header">
+          <a href="../index.html" class="back-home">← Home</a>
+          <h1 class="profile-title">Account / Profile</h1>
+        </div>
+
+        <div class="profile-list">
+          <a class="profile-option" href="help.html">
+            <span class="option-icon">?</span>
+            <span class="option-label" data-i18n="help-center">Help Center</span>
+            <span class="chevron">›</span>
+          </a>
+
+          <button class="profile-option" type="button" data-action="language">
+            <span class="option-icon">A</span>
+            <span class="option-label" data-i18n="change-language">Change Language</span>
+            <span class="chevron">›</span>
+          </button>
+
+          <button class="profile-option" type="button" data-action="share">
+            <span class="option-icon">↗</span>
+            <span class="option-label" data-i18n="share-product">Share Product</span>
+            <span class="chevron">›</span>
+          </button>
+
+          <button class="profile-option" type="button" data-action="rating">
+            <span class="option-icon">★</span>
+            <span class="option-label" data-i18n="rating">Rating</span>
+            <span class="chevron">›</span>
+          </button>
+        </div>
+
+        <div id="orders-section" class="orders-box">
+          <div class="profile-order">
+            <strong data-i18n="my-order">My Order</strong>
+            <small id="order-summary-text">No recent order found.</small>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="language-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="language-title">
+        <div class="modal-head">
+          <h3 id="language-title" data-i18n="change-language">Change Language</h3>
+          <button type="button" class="close-btn" data-close="language" aria-label="Close">×</button>
+        </div>
+
+        <div class="lang-list">
+          <button type="button" class="lang-option is-selected" data-lang="en">English</button>
+          <button type="button" class="lang-option" data-lang="hi">हिन्दी</button>
+          <button type="button" class="lang-option" data-lang="hinglish">Hinglish</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rating-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rating-title">
+        <div class="modal-head">
+          <h3 id="rating-title">Rate SIDRA COBE</h3>
+          <button type="button" class="close-btn" data-close="rating" aria-label="Close">×</button>
+        </div>
+
+        <div class="star-row" aria-label="Rating stars">
+          <button type="button" class="star-btn" data-value="1" aria-label="1 star">★</button>
+          <button type="button" class="star-btn" data-value="2" aria-label="2 stars">★</button>
+          <button type="button" class="star-btn" data-value="3" aria-label="3 stars">★</button>
+          <button type="button" class="star-btn" data-value="4" aria-label="4 stars">★</button>
+          <button type="button" class="star-btn" data-value="5" aria-label="5 stars">★</button>
+        </div>
+        <div class="rating-note" id="rating-note">Select a rating</div>
+        <div style="margin-top:12px;">
+          <button type="button" id="submit-rating" class="primary-btn" style="width:100%; min-height:48px; border:none; border-radius:12px; background:#111; color:#fff; font-weight:700;">Submit Rating</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <script src="../js/main.js"></script>
+    <script>
+      (() => {
+        const toast = document.getElementById('toast');
+        const languageModal = document.getElementById('language-modal');
+        const ratingModal = document.getElementById('rating-modal');
+        const hideModal = (modal) => {
+          modal.classList.add('hidden');
+          modal.setAttribute('aria-hidden', 'true');
+        };
+        const openModal = (modal) => {
+          modal.classList.remove('hidden');
+          modal.setAttribute('aria-hidden', 'false');
+        };
+        const showToast = (message) => {
+          toast.textContent = message;
+          toast.classList.add('show');
+          clearTimeout(showToast.timeoutId);
+          showToast.timeoutId = setTimeout(() => toast.classList.remove('show'), 1800);
+        };
+
+        const getStoredRatings = () => {
+          try {
+            const raw = localStorage.getItem('sidraCobeRatings');
+            return raw ? JSON.parse(raw) : [];
+          } catch (error) {
+            return [];
+          }
+        };
+
+        const readOrders = () => {
+          try {
+            const raw = localStorage.getItem('sidraCobeOrders');
+            const list = raw ? JSON.parse(raw) : [];
+            return Array.isArray(list) ? list : [];
+          } catch (error) {
+            return [];
+          }
+        };
+
+        const renderOrderSummary = () => {
+          const summaryText = document.getElementById('order-summary-text');
+          const orders = readOrders();
+          if (!orders.length) {
+            summaryText.textContent = 'No recent order found.';
+            return;
+          }
+
+          const latest = orders[0];
+          const name = latest.productName || latest.products || 'Product';
+          const total = latest.total || '₹0';
+          summaryText.textContent = `${name} • ${total}`;
+        };
+
+        const updateLanguageSelection = () => {
+          const current = window.getSidraLanguage ? window.getSidraLanguage() : (localStorage.getItem('sidraLanguage') || 'en');
+          document.querySelectorAll('.lang-option').forEach((button) => {
+            button.classList.toggle('is-selected', button.dataset.lang === current);
+          });
+        };
+
+        document.querySelectorAll('[data-close]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const target = button.dataset.close;
+            if (target === 'language') hideModal(languageModal);
+            if (target === 'rating') hideModal(ratingModal);
+          });
+        });
+
+        document.querySelector('[data-action="language"]').addEventListener('click', () => openModal(languageModal));
+
+        document.querySelectorAll('.lang-option').forEach((button) => {
+          button.addEventListener('click', () => {
+            const nextLang = button.dataset.lang || 'en';
+            if (window.setSidraLanguage) {
+              window.setSidraLanguage(nextLang);
+            } else {
+              localStorage.setItem('sidraLanguage', nextLang);
+            }
+            updateLanguageSelection();
+            hideModal(languageModal);
+            const text = nextLang === 'hi' ? 'भाषा बदल दी गई' : nextLang === 'hinglish' ? 'Hinglish selected' : 'Language set to English';
+            showToast(text);
+          });
+        });
+
+        document.querySelector('[data-action="share"]').addEventListener('click', async () => {
+          const storedProduct = (() => {
+            try {
+              return JSON.parse(localStorage.getItem('sidraCobeSelectedProduct') || 'null');
+            } catch (error) {
+              return null;
+            }
+          })();
+
+          const product = storedProduct || {
+            id: 'sidra-cobe-featured',
+            name: 'SIDRA COBE Product',
+            url: `${window.location.origin}/index.html`
+          };
+
+          const productUrl = product.url || `${window.location.origin}/pages/product.html?id=${encodeURIComponent(product.id)}`;
+          const shareText = product.name ? `Check out ${product.name} from SIDRA COBE.` : 'Check out this product from SIDRA COBE.';
+          const shareData = {
+            title: product.name || 'SIDRA COBE',
+            text: shareText,
+            url: productUrl
+          };
+
+          try {
+            if (navigator.share) {
+              await navigator.share(shareData);
+              showToast('Product shared');
+              return;
+            }
+          } catch (error) {
+            // Fall back to clipboard copy.
+          }
+
+          try {
+            if (navigator.clipboard) {
+              await navigator.clipboard.writeText(productUrl);
+              showToast('Link copied');
+            } else {
+              showToast('Sharing unavailable');
+            }
+          } catch (error) {
+            showToast('Link copied');
+          }
+        });
+
+        let selectedRating = 0;
+        const starButtons = Array.from(document.querySelectorAll('.star-btn'));
+        const ratingNote = document.getElementById('rating-note');
+
+        starButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            selectedRating = Number(button.dataset.value || 0);
+            starButtons.forEach((star) => {
+              star.classList.toggle('is-active', Number(star.dataset.value) <= selectedRating);
+            });
+            ratingNote.textContent = selectedRating === 1 ? '1 star selected' : `${selectedRating} stars selected`;
+          });
+        });
+
+        document.getElementById('submit-rating').addEventListener('click', () => {
+          if (!selectedRating) {
+            ratingNote.textContent = 'Select a rating';
+            showToast('Select a rating');
+            return;
+          }
+
+          const previous = getStoredRatings();
+          previous.push({
+            value: selectedRating,
+            createdAt: new Date().toISOString()
+          });
+          localStorage.setItem('sidraCobeRatings', JSON.stringify(previous));
+          showToast('Thank you for your rating!');
+          hideModal(ratingModal);
+          selectedRating = 0;
+          starButtons.forEach((star) => star.classList.remove('is-active'));
+          ratingNote.textContent = 'Select a rating';
+        });
+
+        document.querySelector('[data-action="rating"]').addEventListener('click', () => openModal(ratingModal));
+
+        document.querySelectorAll('.account-button').forEach((button) => {
+          button.addEventListener('click', () => { window.location.href = 'account.html'; });
+        });
+        document.querySelectorAll('.wishlist-button').forEach((button) => {
+          button.addEventListener('click', () => { window.location.href = 'wishlist.html'; });
+        });
+        document.querySelectorAll('.cart-button').forEach((button) => {
+          button.addEventListener('click', () => { window.location.href = 'cart.html'; });
+        });
+
+        document.querySelectorAll('.modal').forEach((modal) => {
+          modal.addEventListener('click', (event) => {
+            if (event.target === modal) hideModal(modal);
+          });
+        });
+
+        if (window.applySidraTranslation) {
+          window.applySidraTranslation();
+        }
+        updateLanguageSelection();
+        renderOrderSummary();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIDRA COBE | Order Tracking</title>
+    <style>
+      :root {
+        --primary: #0d6efd;
+        --primary-dark: #0a4fcf;
+        --primary-soft: #edf5ff;
+        --surface: #ffffff;
+        --background: #f5f9ff;
+        --line: #e7edf5;
+        --text: #1d2a36;
+        --muted: #64758a;
+        --success: #1aa56a;
+        --warning: #f7b94a;
+        --shadow: 0 18px 40px rgba(13, 65, 136, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { text-decoration: none; color: inherit; }
+      button { font: inherit; cursor: pointer; }
+      .container { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+      .announcement-bar {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .announcement-inner {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: rgba(255,255,255,0.96);
+        border-bottom: 1px solid rgba(13, 65, 136, 0.08);
+        backdrop-filter: blur(10px);
+      }
+      .header-inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        gap: 18px;
+        min-height: 86px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text);
+        font-weight: 800;
+        letter-spacing: 0.03em;
+      }
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--primary), #63a5ff);
+        color: white;
+      }
+      .header-search { display: flex; justify-content: center; }
+      .search-wrap {
+        display: flex;
+        align-items: center;
+        width: min(100%, 440px);
+        min-height: 48px;
+        background: var(--primary-soft);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 18px;
+      }
+      .search-wrap svg {
+        width: 18px;
+        height: 18px;
+        fill: var(--muted);
+      }
+      .search-wrap input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        outline: none;
+        padding-left: 12px;
+        font-size: 0.96rem;
+      }
+      .header-actions { display: flex; align-items: center; gap: 12px; }
+      .icon-button {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--primary-soft);
+        border: 1px solid var(--line);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text);
+      }
+      .icon-button svg { width: 19px; height: 19px; fill: currentColor; }
+      .cart-count, .wishlist-count {
+        position: absolute;
+        top: -5px;
+        right: -4px;
+        min-width: 18px;
+        height: 18px;
+        display: grid;
+        place-items: center;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: var(--primary);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      .page {
+        padding: 32px 0 72px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        border-radius: 20px;
+        padding: 28px;
+      }
+      .breadcrumb {
+        display: flex;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 18px;
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--primary);
+        font-size: 0.74rem;
+        font-weight: 800;
+      }
+      h1 {
+        margin: 0 0 18px;
+        font-size: clamp(2rem, 3vw, 2.7rem);
+      }
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+      .status-pill {
+        display: inline-flex;
+        min-height: 32px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 0 14px;
+        background: rgba(26,165,106,0.12);
+        color: var(--success);
+        font-weight: 700;
+      }
+      .timeline {
+        display: grid;
+        gap: 14px;
+        margin-top: 24px;
+      }
+      .timeline-item {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .timeline-bullet {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary);
+        border: 4px solid rgba(13,110,253,0.12);
+        margin-top: 4px;
+      }
+      .timeline-item.inactive .timeline-bullet {
+        background: #dfe7f3;
+        border-color: rgba(100,117,138,0.12);
+      }
+      .timeline-item h3,
+      .timeline-item p {
+        margin: 0;
+      }
+      .timeline-item p {
+        color: var(--muted);
+      }
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 26px;
+      }
+      .meta-box {
+        background: var(--primary-soft);
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+      .meta-box small {
+        display: block;
+        color: var(--muted);
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        border-radius: 10px;
+        padding: 0 18px;
+        border: 1px solid transparent;
+        font-weight: 700;
+      }
+      .button-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .button-secondary {
+        background: white;
+        border-color: var(--line);
+        color: var(--text);
+      }
+      @media (max-width: 740px) {
+        .header-inner { grid-template-columns: auto 1fr auto; }
+        .header-search { grid-column: 1 / -1; order: 3; padding-bottom: 12px; }
+        .meta-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="announcement-bar">
+      <div class="container announcement-inner">
+        <span>Free Shipping</span>
+        <span>COD Available</span>
+        <span>Easy Returns</span>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <button class="icon-button account-button" type="button" aria-label="Account" data-account-page="account.html">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z"></path></svg>
+        </button>
+
+        <a href="../index.html" class="brand" aria-label="SIDRA COBE home">
+          <span class="brand-mark">S</span>
+          <span class="brand-text">SIDRA COBE</span>
+        </a>
+
+        <div class="header-search">
+          <label class="search-wrap" aria-label="Search products">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.5 3a7.5 7.5 0 015.96 12.06l4.94 4.94 1.41-1.41-4.94-4.94A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z"></path>
+            </svg>
+            <input type="search" placeholder="Search products..." />
+          </label>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-button wishlist-button" type="button" aria-label="Wishlist" data-wishlist-page="wishlist.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 016.5 4c1.74 0 3.41.81 4.5 2.09A6.08 6.08 0 0115.5 4 4.5 4.5 0 0120 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+            <span class="wishlist-count">0</span>
+          </button>
+
+          <button class="icon-button cart-button" type="button" aria-label="Cart" data-cart-page="cart.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a2 2 0 110 4 2 2 0 010-4zm10 0a2 2 0 110 4 2 2 0 010-4zM6.2 6h14.6l-1.9 7.6a2 2 0 01-2 1.6H9.1a2 2 0 01-2-1.6L5.2 4H2V2h4l.5 2z"></path></svg>
+            <span class="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container card">
+        <div class="breadcrumb">
+          <a href="account.html">My Account</a>
+          <span>/</span>
+          <span>Track Order</span>
+        </div>
+
+        <p class="eyebrow">Tracking</p>
+        <h1 id="tracking-title">Order SIDRA-2401</h1>
+
+        <div class="status-row">
+          <span class="status-pill" id="tracking-status">Order Confirmed</span>
+          <span id="tracking-date">Loading order status...</span>
+        </div>
+
+        <div class="timeline" id="tracking-timeline"></div>
+
+        <div class="meta-grid">
+          <div class="meta-box">
+            <small>Order ID</small>
+            <strong id="tracking-id">--</strong>
+          </div>
+          <div class="meta-box">
+            <small>Order Date</small>
+            <strong id="tracking-date-text">--</strong>
+          </div>
+          <div class="meta-box">
+            <small>Items</small>
+            <strong id="tracking-items">--</strong>
+          </div>
+          <div class="meta-box">
+            <small>Total</small>
+            <strong id="tracking-total">--</strong>
+          </div>
+          <div class="meta-box">
+            <small>Customer</small>
+            <strong id="tracking-customer">--</strong>
+          </div>
+          <div class="meta-box">
+            <small>Current Status</small>
+            <strong id="tracking-current-status">--</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="account.html" class="button button-secondary">Back to account</a>
+          <a href="../index.html" class="button button-primary">Continue shopping</a>
+        </div>
+      </div>
+    </main>
+
+    <script src="../js/main.js"></script>
+    <script>
+      (function () {
+        const CART_KEYS = ["sidraCobeCart", "sidraCart", "sidra-cobe-cart", "cartData"];
+        const WISHLIST_KEY = "sidraCobeWishlist";
+        const ORDER_KEY = "sidraCobeOrders";
+        const steps = [
+          "Order Placed",
+          "Order Confirmed",
+          "Processing",
+          "Shipped",
+          "Out for Delivery",
+          "Delivered"
+        ];
+
+        const safeNumber = (value) => {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : 0;
+        };
+
+        const readJSON = (key, fallback) => {
+          try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+          } catch (error) {
+            return fallback;
+          }
+        };
+
+        const readCart = () => {
+          for (const key of CART_KEYS) {
+            try {
+              const raw = localStorage.getItem(key);
+              if (!raw) continue;
+              const parsed = JSON.parse(raw);
+              if (!Array.isArray(parsed)) continue;
+              return parsed.filter((item) => item && item.id && safeNumber(item.quantity) > 0).map((item) => ({
+                id: String(item.id),
+                name: item.name || "Product",
+                price: safeNumber(item.price),
+                quantity: safeNumber(item.quantity)
+              }));
+            } catch (error) {}
+          }
+          return [];
+        };
+
+        const readWishlist = () => {
+          try {
+            const raw = localStorage.getItem(WISHLIST_KEY);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (error) { return []; }
+        };
+
+        const updateCounts = () => {
+          const cartCount = readCart().reduce((sum, item) => sum + item.quantity, 0);
+          const wishlistCount = readWishlist().length;
+          document.querySelectorAll(".cart-count").forEach((el) => { el.textContent = String(cartCount); });
+          document.querySelectorAll(".wishlist-count").forEach((el) => { el.textContent = String(wishlistCount); });
+        };
+
+        const getCurrentOrder = () => {
+          const orders = readJSON(ORDER_KEY, []);
+          if (!Array.isArray(orders) || !orders.length) {
+            return null;
+          }
+          return orders[0];
+        };
+
+        const normalizeStatus = (status) => {
+          const value = String(status || "").trim();
+          if (!value) return "Order Confirmed";
+          const lower = value.toLowerCase();
+          if (lower.includes("cancel")) return "Order Cancelled";
+          if (lower.includes("confirmed")) return "Order Confirmed";
+          if (lower.includes("processing")) return "Processing";
+          if (lower.includes("shipped")) return "Shipped";
+          if (lower.includes("delivery")) return "Out for Delivery";
+          if (lower.includes("deliver")) return "Delivered";
+          return value;
+        };
+
+        const buildTimeline = (status) => {
+          const timeline = document.getElementById("tracking-timeline");
+          if (!timeline) return;
+
+          const cancelled = status === "Order Cancelled";
+          const currentIndex = cancelled ? -1 : steps.findIndex((step) => step === status);
+
+          timeline.innerHTML = steps.map((step, index) => {
+            const isActive = !cancelled && index <= (currentIndex >= 0 ? currentIndex : 0);
+            const className = `timeline-item${isActive ? "" : " inactive"}`;
+            return `
+              <div class="${className}">
+                <span class="timeline-bullet"></span>
+                <div>
+                  <h3>${step}</h3>
+                  <p>${cancelled ? "Cancelled order" : step === status ? "Current status" : "Progressing"}</p>
+                </div>
+              </div>
+            `;
+          }).join("");
+
+          if (cancelled) {
+            timeline.innerHTML = `
+              <div class="timeline-item">
+                <span class="timeline-bullet"></span>
+                <div>
+                  <h3>Order Cancelled</h3>
+                  <p>This order was cancelled and no delivery timeline applies.</p>
+                </div>
+              </div>
+            `;
+          }
+        };
+
+        const order = getCurrentOrder();
+        const status = order ? normalizeStatus(order.status || order.paymentStatus || order.paymentMethod || "Order Confirmed") : "Order Confirmed";
+
+        document.getElementById("tracking-title").textContent = order ? `Order ${order.orderNumber || "SIDRA"}` : "Order not found";
+        document.getElementById("tracking-status").textContent = status;
+        document.getElementById("tracking-date").textContent = order ? (order.date || "Order date unavailable") : "No order data available";
+        document.getElementById("tracking-id").textContent = order ? (order.orderNumber || "--") : "--";
+        document.getElementById("tracking-date-text").textContent = order ? (order.date || "--") : "--";
+        document.getElementById("tracking-items").textContent = order ? (order.productName || order.products || "Product") : "--";
+        document.getElementById("tracking-total").textContent = order ? (order.total || "₹0") : "--";
+        document.getElementById("tracking-customer").textContent = order && order.address ? (order.address.fullName || "Customer") : "Customer";
+        document.getElementById("tracking-current-status").textContent = status;
+
+        buildTimeline(status);
+
+        document.querySelector(".wishlist-button").addEventListener("click", () => {
+          window.location.href = "wishlist.html";
+        });
+        document.querySelector(".cart-button").addEventListener("click", () => {
+          window.location.href = "cart.html";
+        });
+        document.querySelector(".account-button").addEventListener("click", () => {
+          window.location.href = "account.html";
+        });
+
+        if (window.applySidraTranslation) {
+          window.applySidraTranslation();
+        }
+
+        updateCounts();
+      })();
+    </script>
+  </body>
+</html>

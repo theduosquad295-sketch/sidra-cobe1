@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIDRA COBE | Wishlist</title>
+    <style>
+      :root {
+        --bg: #f7f3ee;
+        --surface: #ffffff;
+        --line: #eae1d7;
+        --text: #1a1a1a;
+        --muted: #666666;
+        --primary: #111111;
+        --primary-soft: #f4f1ed;
+        --shadow: 0 18px 38px rgba(17, 17, 17, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+      a { color: inherit; text-decoration: none; }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      img { max-width: 100%; display: block; }
+
+      .container { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: rgba(255,255,255,0.96);
+        border-bottom: 1px solid rgba(17,17,17,0.06);
+        backdrop-filter: blur(10px);
+      }
+
+      .header-row {
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        align-items: center;
+        gap: 10px;
+        min-height: 72px;
+      }
+
+      .back-link {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: var(--primary-soft);
+        color: var(--text);
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .header-title {
+        justify-self: center;
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .header-icon {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: var(--primary-soft);
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header-icon svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      .wishlist-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 16px;
+        height: 16px;
+        display: grid;
+        place-items: center;
+        padding: 2px 4px;
+        border-radius: 999px;
+        background: var(--text);
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 800;
+      }
+
+      .page {
+        padding: 18px 0 90px;
+      }
+
+      .wishlist-empty {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 32px 20px;
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+
+      .wishlist-empty.hidden { display: none; }
+      .wishlist-empty h2 { margin: 0 0 12px; font-size: 1.8rem; letter-spacing: -0.04em; }
+      .wishlist-empty p { margin: 0 0 20px; color: var(--muted); }
+
+      .primary-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 18px;
+        border-radius: 14px;
+        background: var(--text);
+        color: #fff;
+        font-weight: 800;
+      }
+
+      .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .wishlist-item {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+
+      .product-image {
+        height: 170px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .product-info {
+        padding: 10px 10px 12px;
+      }
+
+      .product-name {
+        margin: 0 0 8px;
+        font-size: 0.92rem;
+        line-height: 1.35;
+      }
+
+      .product-price {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0 0 10px;
+      }
+
+      .product-actions {
+        display: grid;
+        gap: 8px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .btn.primary {
+        background: var(--text);
+        border-color: var(--text);
+        color: #fff;
+      }
+
+      .btn.secondary {
+        background: var(--primary-soft);
+        border-color: var(--line);
+      }
+
+      @media (min-width: 700px) {
+        .container { max-width: 760px; }
+        .wishlist-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <a class="back-link" href="../index.html" aria-label="Back to home">←</a>
+        <h1 class="header-title">Wishlist</h1>
+        <button class="header-icon" type="button" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 016.5 4c1.74 0 3.41.81 4.5 2.09A6.08 6.08 0 0115.5 4 4.5 4.5 0 0120 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+          <span class="wishlist-count">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container">
+        <div id="wishlist-empty" class="wishlist-empty hidden">
+          <h2>Your Wishlist is Empty</h2>
+          <p>Save your favorite pieces and come back anytime.</p>
+          <a href="../index.html" class="primary-button">Explore Products</a>
+        </div>
+
+        <div id="wishlist-grid" class="wishlist-grid"></div>
+      </div>
+    </main>
+
+    <script src="../js/main.js"></script>
+    <script>
+      (function () {
+        const WISHLIST_KEY = "sidraCobeWishlist";
+        const CART_KEYS = ["sidraCobeCart", "sidraCart", "sidra-cobe-cart", "cartData"];
+        const IMAGE_MAP = {
+          "media-one": "../images/products/shirt1.jpg",
+          "media-two": "../images/products/shoes1.jpg",
+          "media-three": "../images/products/ladies-purse1.jpg",
+          "media-four": "../images/products/sunglasses1.jpg",
+          "media-five": "../images/products/hoodie1.jpg",
+          "media-six": "../images/products/bag1.jpg",
+          "media-seven": "../images/products/tshirt1.jpg",
+          "media-eight": "../images/products/watch1.jpg"
+        };
+
+        function safeNumber(value) {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function readWishlist() {
+          try {
+            const raw = localStorage.getItem(WISHLIST_KEY);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) return [];
+            return parsed.filter((item) => item && item.id).map((item) => ({
+              id: String(item.id),
+              name: item.name || "Product",
+              category: item.category || "Featured",
+              price: safeNumber(item.price),
+              imageClass: item.imageClass || "media-one"
+            }));
+          } catch (error) {
+            return [];
+          }
+        }
+
+        function saveWishlist(items) {
+          const unique = [];
+          const seen = new Set();
+          items.forEach((item) => {
+            const key = String(item.id);
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            unique.push({
+              id: key,
+              name: item.name || "Product",
+              category: item.category || "Featured",
+              price: safeNumber(item.price),
+              imageClass: item.imageClass || "media-one"
+            });
+          });
+          localStorage.setItem(WISHLIST_KEY, JSON.stringify(unique));
+        }
+
+        function readCart() {
+          for (const key of CART_KEYS) {
+            try {
+              const raw = localStorage.getItem(key);
+              if (!raw) continue;
+              const parsed = JSON.parse(raw);
+              if (!Array.isArray(parsed)) continue;
+              return parsed.filter((item) => item && item.id && safeNumber(item.quantity) > 0).map((item) => ({
+                id: String(item.id),
+                name: item.name || "Product",
+                category: item.category || "Featured",
+                price: safeNumber(item.price),
+                quantity: safeNumber(item.quantity),
+                imageClass: item.imageClass || "media-one"
+              }));
+            } catch (error) { }
+          }
+          return [];
+        }
+
+        function saveCart(cart) {
+          const payload = JSON.stringify(cart.filter((item) => item && item.id && safeNumber(item.quantity) > 0).map((item) => ({
+            id: String(item.id),
+            name: item.name || "Product",
+            category: item.category || "Featured",
+            price: safeNumber(item.price),
+            quantity: safeNumber(item.quantity),
+            imageClass: item.imageClass || "media-one"
+          })));
+          CART_KEYS.forEach((key) => {
+            try { localStorage.setItem(key, payload); } catch (error) { }
+          });
+        }
+
+        function updateCounts() {
+          const wishlist = readWishlist();
+          const cart = readCart();
+          document.querySelectorAll(".wishlist-count").forEach((count) => {
+            count.textContent = String(wishlist.length);
+          });
+          document.querySelectorAll(".cart-count").forEach((count) => {
+            count.textContent = String(cart.reduce((sum, item) => sum + safeNumber(item.quantity), 0));
+          });
+        }
+
+        function getImagePath(item) {
+          const productMeta = window.getSidraProductById ? window.getSidraProductById(item.id) : null;
+          const imageClass = productMeta && productMeta.imageClass ? productMeta.imageClass : (item.imageClass || "media-one");
+          if (window.getSidraImagePath) {
+            return window.getSidraImagePath(imageClass);
+          }
+          return IMAGE_MAP[imageClass] || IMAGE_MAP["media-one"];
+        }
+
+        function formatIndianCurrency(value) {
+          return new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0
+          }).format(safeNumber(value));
+        }
+
+        function addToCart(productId) {
+          const wishlist = readWishlist();
+          const match = wishlist.find((item) => String(item.id) === String(productId));
+          if (!match) return;
+
+          const cart = readCart();
+          const item = cart.find((entry) => String(entry.id) === String(match.id));
+          if (item) {
+            item.quantity = safeNumber(item.quantity) + 1;
+          } else {
+            cart.push({
+              id: match.id,
+              name: match.name,
+              category: match.category,
+              price: match.price,
+              quantity: 1,
+              imageClass: match.imageClass || "media-one"
+            });
+          }
+          saveCart(cart);
+          updateCounts();
+        }
+
+        function renderWishlist() {
+          const wishlist = readWishlist();
+          const emptyState = document.getElementById("wishlist-empty");
+          const grid = document.getElementById("wishlist-grid");
+
+          updateCounts();
+
+          if (!wishlist.length) {
+            emptyState.classList.remove("hidden");
+            grid.innerHTML = "";
+            return;
+          }
+
+          emptyState.classList.add("hidden");
+          grid.innerHTML = wishlist.map((item) => {
+            const imagePath = getImagePath(item);
+            return `
+              <article class="wishlist-item" data-id="${item.id}">
+                <div class="product-image" style="background-image: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.08)), url('${imagePath}')"></div>
+                <div class="product-info">
+                  <h3 class="product-name">${item.name}</h3>
+                  <div class="product-price">${formatIndianCurrency(item.price)}</div>
+                  <div class="product-actions">
+                    <button type="button" class="btn primary" data-action="add-to-cart" data-id="${item.id}">Add to Cart</button>
+                    <button type="button" class="btn secondary" data-action="remove" data-id="${item.id}">Remove</button>
+                  </div>
+                </div>
+              </article>
+            `;
+          }).join("");
+        }
+
+        document.addEventListener("click", (event) => {
+          const trigger = event.target.closest("[data-action]");
+          if (!trigger) return;
+
+          const action = trigger.dataset.action;
+          const productId = trigger.dataset.id;
+          const wishlist = readWishlist();
+
+          if (action === "remove") {
+            saveWishlist(wishlist.filter((item) => String(item.id) !== String(productId)));
+            renderWishlist();
+            return;
+          }
+
+          if (action === "add-to-cart") {
+            addToCart(productId);
+          }
+        });
+
+        renderWishlist();
+      })();
+    </script>
+  </body>
+</html>

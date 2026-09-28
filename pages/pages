@@ -1,0 +1,2 @@
+<!-- from any file inside /pages -->
+<img src="../images/your-file.jpg" alt="..." />

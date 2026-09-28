@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SIDRA COBE order success page." />
+    <title>SIDRA COBE | Order Success</title>
+    <style>
+      :root {
+        --primary: #0d6efd;
+        --primary-dark: #0a4fcf;
+        --primary-soft: #edf5ff;
+        --surface: #ffffff;
+        --background: #f5f9ff;
+        --line: #e7edf5;
+        --text: #1d2a36;
+        --muted: #64758a;
+        --success: #1aa56a;
+        --danger: #d93d4d;
+        --shadow: 0 18px 40px rgba(13, 65, 136, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: var(--background); color: var(--text); line-height: 1.6; }
+      a { text-decoration: none; color: inherit; }
+      button, input { font: inherit; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+      .announcement-bar { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 0.8rem; font-weight: 700; }
+      .announcement-inner { min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
+      .site-header { position: sticky; top: 0; z-index: 40; background: rgba(255,255,255,0.96); border-bottom: 1px solid rgba(13, 65, 136, 0.08); backdrop-filter: blur(10px); }
+      .header-inner { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 18px; min-height: 86px; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 800; letter-spacing: 0.03em; }
+      .brand-logo { width: 38px; height: 38px; object-fit: cover; border-radius: 12px; }
+      .brand-text { font-size: 1.08rem; }
+      .header-search { display: flex; justify-content: center; }
+      .search-wrap { width: min(100%, 520px); display: flex; align-items: center; gap: 10px; background: var(--background); border: 1px solid var(--line); border-radius: 999px; min-height: 48px; padding: 0 16px; color: var(--muted); }
+      .search-wrap svg { width: 18px; height: 18px; fill: currentColor; }
+      .search-wrap input { width: 100%; border: none; background: transparent; color: var(--text); font-size: 0.95rem; outline: none; }
+      .search-wrap input::placeholder { color: var(--muted); }
+      .header-actions { display: flex; align-items: center; gap: 12px; }
+      .icon-button { position: relative; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; background: var(--background); border: 1px solid var(--line); border-radius: 50%; color: var(--text); }
+      .icon-button svg { width: 20px; height: 20px; fill: currentColor; }
+      .cart-count, .wishlist-count { position: absolute; top: -5px; right: -4px; min-width: 18px; height: 18px; padding: 2px 5px; display: grid; place-items: center; border-radius: 999px; background: var(--primary); color: #fff; font-size: 0.7rem; font-weight: 800; }
+      .page { padding: 52px 0 72px; }
+      .success-card { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); padding: 32px; }
+      .success-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+      .success-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(26,165,106,0.12); display: grid; place-items: center; color: var(--success); font-size: 2rem; font-weight: 800; }
+      h1 { margin: 0; font-size: clamp(1.9rem, 3vw, 2.8rem); }
+      .summary-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; margin-top: 18px; }
+      .detail-box { background: var(--background); border-radius: 20px; border: 1px solid var(--line); padding: 22px; }
+      .detail-row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .detail-row:last-child { border-bottom: none; }
+      .label { color: var(--muted); }
+      .product-mini { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+      .mini-image { width: 88px; height: 88px; border-radius: 18px; background: linear-gradient(135deg, rgba(13,110,253,0.15), rgba(75,114,255,0.2)); }
+      .mini-image.media-one, .mini-image.media-two, .mini-image.media-three, .mini-image.media-four, .mini-image.media-five, .mini-image.media-six, .mini-image.media-seven, .mini-image.media-eight { background-size: cover; background-position: center; }
+      .mini-image.media-one { background-image: linear-gradient(135deg, rgba(20,92,193,0.2), rgba(80,160,255,0.32)), url("../images/products/shirt1.jpg"); }
+      .mini-image.media-two { background-image: linear-gradient(135deg, rgba(35,35,35,0.18), rgba(120,149,166,0.3)), url("../images/products/shoes1.jpg"); }
+      .mini-image.media-three { background-image: linear-gradient(135deg, rgba(160,104,60,0.18), rgba(216,180,120,0.25)), url("../images/products/ladies-purse1.jpg"); }
+      .mini-image.media-four { background-image: linear-gradient(135deg, rgba(139,132,236,0.2), rgba(102,89,205,0.18)), url("../images/products/sunglasses1.jpg"); }
+      .mini-image.media-five { background-image: linear-gradient(135deg, rgba(104,157,255,0.18), rgba(75,111,189,0.22)), url("../images/products/hoodie1.jpg"); }
+      .mini-image.media-six { background-image: linear-gradient(135deg, rgba(117,92,62,0.2), rgba(196,150,92,0.2)), url("../images/products/bag1.jpg"); }
+      .mini-image.media-seven { background-image: linear-gradient(135deg, rgba(98,110,126,0.18), rgba(200,201,210,0.18)), url("../images/products/tshirt1.jpg"); }
+      .mini-image.media-eight { background-image: linear-gradient(135deg, rgba(49,112,126,0.2), rgba(128,196,211,0.22)), url("../images/products/watch1.jpg"); }
+      .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+      .button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; padding: 0 20px; border: 1px solid transparent; font-weight: 700; }
+      .button-primary { background: var(--primary); color: white; }
+      .button-secondary { background: white; border-color: var(--line); color: var(--text); }
+      @media (max-width: 820px) { .summary-grid { grid-template-columns: 1fr; } .actions { flex-direction: column; align-items: stretch; } .button { width: 100%; } }
+      @media (max-width: 740px) { .header-inner { grid-template-columns: auto 1fr auto; } .header-search { grid-column: 1 / -1; order: 3; padding-bottom: 12px; } }
+    </style>
+  </head>
+  <body>
+    <div class="announcement-bar">
+      <div class="container announcement-inner">
+        <span>Free Shipping</span>
+        <span>COD Available</span>
+        <span>Easy Returns</span>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <button class="icon-button account-button" type="button" aria-label="Account" data-account-page="account.html">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z" /></svg>
+        </button>
+
+        <a href="../index.html" class="brand" aria-label="SIDRA COBE home">
+          <img class="brand-logo" src="../images/logo/logo.jpg" alt="SIDRA COBE logo" />
+          <span class="brand-text">SIDRA COBE</span>
+        </a>
+
+        <div class="header-search">
+          <label class="search-wrap" aria-label="Search products">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 015.96 12.06l4.94 4.94 1.41-1.41-4.94-4.94A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" /></svg>
+            <input type="search" placeholder="Search products..." />
+          </label>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-button wishlist-button" type="button" aria-label="Wishlist" data-wishlist-page="wishlist.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 016.5 4c1.74 0 3.41.81 4.5 2.09A6.08 6.08 0 0115.5 4 4.5 4.5 0 0120 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+            <span class="wishlist-count">0</span>
+          </button>
+
+          <button class="icon-button cart-button" type="button" aria-label="Cart" data-cart-page="cart.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a2 2 0 110 4 2 2 0 010-4zm10 0a2 2 0 110 4 2 2 0 010-4zM6.2 6h14.6l-1.9 7.6a2 2 0 01-2 1.6H9.1a2 2 0 01-2-1.6L5.2 4H2V2h4l.5 2z" /></svg>
+            <span class="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container">
+        <div class="success-card">
+          <div class="success-header">
+            <div class="success-icon">✓</div>
+            <div>
+              <h1>Order Placed Successfully</h1>
+            </div>
+          </div>
+
+          <div class="summary-grid">
+            <div class="detail-box">
+              <div id="product-mini" class="product-mini">
+                <div id="mini-image" class="mini-image media-one" aria-hidden="true"></div>
+                <div>
+                  <div id="product-name" style="font-weight:800; font-size:1.1rem;">Product</div>
+                  <div id="product-qty" style="color: var(--muted);">Qty: 1</div>
+                </div>
+              </div>
+
+              <div class="detail-row"><span class="label">Order ID</span><strong id="order-id">-</strong></div>
+              <div class="detail-row"><span class="label">Order date</span><strong id="order-date">-</strong></div>
+              <div class="detail-row"><span class="label">Total amount</span><strong id="total-amount">₹0</strong></div>
+              <div class="detail-row"><span class="label">Delivery address</span><strong id="delivery-address">-</strong></div>
+              <div class="detail-row"><span class="label">Payment method</span><strong id="payment-method">-</strong></div>
+              <div class="detail-row"><span class="label">Order status</span><strong id="order-status">Confirmed</strong></div>
+            </div>
+
+            <div class="detail-box">
+              <div class="detail-row"><span class="label">Reference</span><strong id="reference-id">-</strong></div>
+              <div class="detail-row"><span class="label">Product</span><strong id="summary-product">-</strong></div>
+              <div class="detail-row"><span class="label">Quantity</span><strong id="summary-qty">-</strong></div>
+              <div class="detail-row"><span class="label">Amount</span><strong id="summary-total">-</strong></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a href="tracking.html" class="button button-primary">Track Order</a>
+            <a href="../index.html" class="button button-secondary">Continue Shopping</a>
+            <a href="account.html" class="button button-secondary">View My Orders</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../js/main.js"></script>
+    <script>
+      (function () {
+        function safeNumber(value) {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function readJSON(key, fallback) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+          } catch (error) {
+            return fallback;
+          }
+        }
+
+        function formatCurrency(value) {
+          return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(safeNumber(value));
+        }
+
+        function renderOrder() {
+          const order = readJSON("sidraCobeLastOrder", null)
+            || (Array.isArray(readJSON("sidraCobeOrders", [])) ? readJSON("sidraCobeOrders", [])[0] : null);
+
+          if (!order) {
+            document.getElementById("order-id").textContent = "SIDRA-0000";
+            return;
+          }
+
+          const productName = order.productName || order.products || "Product";
+          const quantity = safeNumber(order.quantity) || 1;
+          const address = order.address || {};
+          const addressText = [address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join(", ");
+
+          document.getElementById("mini-image").className = "mini-image " + (order.productImage || "media-one");
+          document.getElementById("product-name").textContent = productName;
+          document.getElementById("product-qty").textContent = "Qty: " + quantity;
+          document.getElementById("order-id").textContent = order.orderNumber || "SIDRA-0000";
+          document.getElementById("reference-id").textContent = order.orderNumber || "SIDRA-0000";
+          document.getElementById("order-date").textContent = order.date || "Today";
+          document.getElementById("total-amount").textContent = order.total || formatCurrency(order.totalValue || 0);
+          document.getElementById("delivery-address").textContent = addressText || "Address not provided";
+          document.getElementById("payment-method").textContent = order.paymentMethod || order.paymentStatus || "Cash on Delivery";
+          document.getElementById("order-status").textContent = order.status || "Confirmed";
+          document.getElementById("summary-product").textContent = productName;
+          document.getElementById("summary-qty").textContent = String(quantity);
+          document.getElementById("summary-total").textContent = order.total || formatCurrency(order.totalValue || 0);
+        }
+
+        renderOrder();
+        document.querySelectorAll(".cart-count, .wishlist-count").forEach((node) => {
+          try {
+            const cart = JSON.parse(localStorage.getItem("sidraCobeCart") || "[]");
+            const wishlist = JSON.parse(localStorage.getItem("sidraCobeWishlist") || "[]");
+            node.textContent = node.classList.contains("cart-count") ? String((Array.isArray(cart) ? cart : []).reduce((sum, item) => sum + safeNumber(item.quantity), 0)) : String((Array.isArray(wishlist) ? wishlist : []).length);
+          } catch (error) {}
+        });
+      })();
+    </script>
+  </body>
+</html>

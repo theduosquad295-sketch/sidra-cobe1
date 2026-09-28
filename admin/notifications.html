@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIDRA COBE | Admin Notifications</title>
+    <style>
+      :root {
+        --primary: #0d6efd;
+        --primary-dark: #0a4fcf;
+        --primary-soft: #edf5ff;
+        --surface: #ffffff;
+        --background: #f5f9ff;
+        --line: #e7edf5;
+        --text: #1d2a36;
+        --muted: #64758a;
+        --success: #1aa56a;
+        --danger: #d93d4d;
+        --shadow: 0 18px 40px rgba(13, 65, 136, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+      .page { padding: 42px 0 72px; }
+      .card { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }
+      .header { padding: 26px 28px; border-bottom: 1px solid var(--line); }
+      .header h1 { margin: 0; font-size: clamp(1.8rem, 2vw, 2.4rem); }
+      .body { padding: 28px; }
+      .notification-list { display: grid; gap: 16px; }
+      .notification-item {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px 20px;
+        background: linear-gradient(180deg, #fff, #f9fbff);
+      }
+      .title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+      .badge { display: inline-flex; align-items: center; min-height: 28px; border-radius: 999px; background: rgba(13,110,253,0.08); color: var(--primary); font-weight: 700; padding: 0 10px; }
+      .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; color: var(--muted); font-size: 0.92rem; }
+      .empty-state { color: var(--muted); background: var(--background); border: 1px dashed var(--line); border-radius: 16px; padding: 18px; }
+      @media (max-width: 620px) { .meta { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="container page">
+      <div class="card">
+        <div class="header">
+          <h1>Admin Notifications</h1>
+        </div>
+        <div class="body">
+          <div id="notification-list" class="notification-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/firebase-web-init.js"></script>
+    <script>
+      (function () {
+        const KEY = "sidraCobeAdminNotifications";
+
+        function readJSON(key, fallback) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+          } catch (error) {
+            return fallback;
+          }
+        }
+
+        function formatDate(value) {
+          if (!value) return "Just now";
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) return value;
+          return date.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+        }
+
+        function renderNotifications() {
+          const list = document.getElementById("notification-list");
+          const items = readJSON(KEY, []);
+
+          if (!Array.isArray(items) || !items.length) {
+            list.innerHTML = '<div class="empty-state">No new order notifications yet.</div>';
+            return;
+          }
+
+          list.innerHTML = items.map((notification) => `
+            <article class="notification-item">
+              <div class="title">
+                <strong>${notification.title || "New Order Received"}</strong>
+                <span class="badge">${notification.status || "queued"}</span>
+              </div>
+              <div class="meta">
+                <div><strong>Order ID:</strong> ${notification.orderId || "-"}</div>
+                <div><strong>Customer:</strong> ${notification.customerName || "Customer"}</div>
+                <div><strong>Product:</strong> ${notification.productName || "Product"}</div>
+                <div><strong>Quantity:</strong> ${notification.quantity || 1}</div>
+                <div><strong>Total:</strong> ₹${Number(notification.orderTotal || 0).toLocaleString("en-IN")}</div>
+                <div><strong>Time:</strong> ${formatDate(notification.orderDateTime || notification.createdAt)}</div>
+              </div>
+            </article>
+          `).join("");
+        }
+
+        renderNotifications();
+
+        if (window.sidraRegisterFirebaseMessaging) {
+          window.sidraRegisterFirebaseMessaging();
+        }
+      })();
+    </script>
+  </body>
+</html>
