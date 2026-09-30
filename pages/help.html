@@ -51,9 +51,12 @@
       .support-item small { display: block; color: var(--muted); font-weight: 600; }
       .chevron { color: var(--muted); font-size: 1.4rem; }
       .faq { margin-top: 18px; display: grid; gap: 12px; }
-      .faq-item { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); padding: 14px 16px; }
-      .faq-item strong { display: block; margin-bottom: 6px; }
-      .faq-item span { color: var(--muted); font-size: 0.92rem; }
+      .faq-item { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+      .faq-item summary { min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; font-weight: 700; cursor: pointer; list-style: none; }
+      .faq-item summary::-webkit-details-marker { display: none; }
+      .faq-item summary::after { content: "+"; color: var(--muted); font-size: 1.2rem; }
+      .faq-item[open] summary::after { content: "−"; }
+      .faq-item p { margin: 0; padding: 0 16px 16px; color: var(--muted); font-size: 0.92rem; }
       @media (min-width: 600px) { .container { max-width: 560px; } }
     </style>
   </head>
@@ -98,22 +101,16 @@
             <div><strong>WhatsApp Support</strong><small>Chat with us on WhatsApp</small></div>
             <span class="chevron">›</span>
           </a>
-          <div class="support-item"><div><strong>Contact Support</strong><small>Need help with your order?</small></div><span class="chevron">›</span></div>
-          <div class="support-item"><div><strong>FAQ</strong><small>Answers to common questions</small></div><span class="chevron">›</span></div>
-          <div class="support-item"><div><strong>Order Help</strong><small>Track and manage orders</small></div><span class="chevron">›</span></div>
-          <div class="support-item"><div><strong>Payment Help</strong><small>Checkout and payment support</small></div><span class="chevron">›</span></div>
-          <div class="support-item"><div><strong>Delivery Help</strong><small>Shipping and delivery info</small></div><span class="chevron">›</span></div>
         </div>
 
         <div class="faq">
-          <div class="faq-item">
-            <strong>How can I contact support?</strong>
-            <span>Use the contact details in the store support section or open the order help center for updates.</span>
-          </div>
-          <div class="faq-item">
-            <strong>How do I track my order?</strong>
-            <span>Open My Order from the mobile navigation or the account menu to review order progress.</span>
-          </div>
+          <details class="faq-item"><summary>Orders</summary><p>Open My Orders in Account to review an order and use its Track Order link. Status is shown from the order record available on this device.</p></details>
+          <details class="faq-item"><summary>Payment</summary><p>Cash on Delivery is currently available. Online payment is not configured, and this site does not report a payment as complete without a real gateway confirmation.</p></details>
+          <details class="faq-item"><summary>Delivery</summary><p>The delivery charge shown in Checkout is included in the order total. A delivery date estimate is not currently available on this site.</p></details>
+          <details class="faq-item"><summary>Returns</summary><p>Return terms are not configured in the current site. Contact support before arranging a return.</p></details>
+          <details class="faq-item"><summary>Refunds</summary><p>Refund timing and processing are not configured in the current site. Contact support for guidance on an existing order.</p></details>
+          <details class="faq-item"><summary>Account</summary><p>Use Saved Address in Account to add, edit, or remove delivery addresses for Checkout.</p></details>
+          <details class="faq-item"><summary>Wishlist / Cart</summary><p>Use the header Wishlist and Cart controls to review saved products and current quantities.</p></details>
         </div>
       </div>
     </main>

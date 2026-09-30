@@ -151,6 +151,7 @@ window.SIDRA_TRANSLATIONS = {
   en: {
     home: "Home",
     "my-order": "My Order",
+    "my-orders": "My Orders",
     ai: "AI",
     account: "Account",
     search: "Search",
@@ -162,6 +163,9 @@ window.SIDRA_TRANSLATIONS = {
     checkout: "Checkout",
     "place-order": "Place Order",
     "help-center": "Help Center",
+    "saved-address": "Saved Address",
+    "whatsapp-support": "WhatsApp Support",
+    logout: "Logout",
     "change-language": "Change Language",
     "share-product": "Share Product",
     rating: "Rating",
@@ -174,11 +178,17 @@ window.SIDRA_TRANSLATIONS = {
     "back-to-home": "Back to Home",
     "lang-english": "English",
     "lang-hindi": "हिन्दी",
-    "lang-hinglish": "Hinglish"
+    "lang-hinglish": "Hinglish",
+    "recent-searches": "Recent searches",
+    "clear-all": "Clear all",
+    "clear-search": "Clear search",
+    "no-products-found": "No products found",
+    "browse-categories": "Browse Categories"
   },
   hi: {
     home: "होम",
     "my-order": "मेरा ऑर्डर",
+    "my-orders": "मेरे ऑर्डर",
     ai: "एआई",
     account: "अकाउंट",
     search: "खोजें",
@@ -190,6 +200,9 @@ window.SIDRA_TRANSLATIONS = {
     checkout: "चेकआउट",
     "place-order": "ऑर्डर करें",
     "help-center": "हेल्प सेंटर",
+    "saved-address": "सहेजे गए पते",
+    "whatsapp-support": "WhatsApp सहायता",
+    logout: "लॉग आउट",
     "change-language": "भाषा बदलें",
     "share-product": "प्रोडक्ट शेयर करें",
     rating: "रेटिंग",
@@ -202,11 +215,17 @@ window.SIDRA_TRANSLATIONS = {
     "back-to-home": "होम पर लौटें",
     "lang-english": "English",
     "lang-hindi": "हिन्दी",
-    "lang-hinglish": "Hinglish"
+    "lang-hinglish": "Hinglish",
+    "recent-searches": "हाल की खोजें",
+    "clear-all": "सब हटाएं",
+    "clear-search": "खोज साफ़ करें",
+    "no-products-found": "कोई उत्पाद नहीं मिला",
+    "browse-categories": "श्रेणियां देखें"
   },
   hinglish: {
     home: "Home",
     "my-order": "Mera Order",
+    "my-orders": "Mere Orders",
     ai: "AI",
     account: "Account",
     search: "Search karo",
@@ -218,6 +237,9 @@ window.SIDRA_TRANSLATIONS = {
     checkout: "Checkout",
     "place-order": "Place Order",
     "help-center": "Help Center",
+    "saved-address": "Saved Address",
+    "whatsapp-support": "WhatsApp Support",
+    logout: "Logout",
     "change-language": "Language badlo",
     "share-product": "Product share karo",
     rating: "Rating",
@@ -230,7 +252,12 @@ window.SIDRA_TRANSLATIONS = {
     "back-to-home": "Home pe wapis",
     "lang-english": "English",
     "lang-hindi": "हिन्दी",
-    "lang-hinglish": "Hinglish"
+    "lang-hinglish": "Hinglish",
+    "recent-searches": "Recent searches",
+    "clear-all": "Clear all",
+    "clear-search": "Clear search",
+    "no-products-found": "No products found",
+    "browse-categories": "Browse Categories"
   }
 };
 window.SIDRA_LANGUAGE_OPTIONS = ["en", "hi", "hinglish"];
@@ -263,6 +290,12 @@ window.applySidraTranslation = () => {
       element.setAttribute("placeholder", dictionary[key]);
     }
   });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    const key = element.dataset.i18nAriaLabel;
+    if (dictionary[key]) {
+      element.setAttribute("aria-label", dictionary[key]);
+    }
+  });
   return language;
 };
 
@@ -289,7 +322,9 @@ document.addEventListener("DOMContentLoaded", () => {
         category: item.category || "Featured",
         price: safeNumber(item.price),
         quantity: safeNumber(item.quantity),
-        imageClass: item.imageClass || "style-1"
+        imageClass: item.imageClass || "media-one",
+        size: item.size || "",
+        variant: item.variant || ""
       }));
   };
 
@@ -350,7 +385,9 @@ document.addEventListener("DOMContentLoaded", () => {
           name: item.name || "Product",
           category: item.category || "Featured",
           price: safeNumber(item.price),
-          imageClass: item.imageClass || "media-one"
+          imageClass: item.imageClass || "media-one",
+          size: item.size || "",
+          variant: item.variant || ""
         }));
     } catch (error) {
       return [];
@@ -369,7 +406,9 @@ document.addEventListener("DOMContentLoaded", () => {
         name: item.name || "Product",
         category: item.category || "Featured",
         price: safeNumber(item.price),
-        imageClass: item.imageClass || "media-one"
+        imageClass: item.imageClass || "media-one",
+        size: item.size || "",
+        variant: item.variant || ""
       });
     });
 
@@ -420,6 +459,16 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const homeSearchInput = document.querySelector("#home-search");
+  const clearSearchButton = document.getElementById("clear-search-button");
+  const searchContainer = document.getElementById("search-container");
+  const searchDropdown = document.getElementById("search-dropdown");
+  const searchSuggestions = document.getElementById("search-suggestions");
+  const recentSearchSection = document.getElementById("recent-search-section");
+  const recentSearchList = document.getElementById("recent-search-list");
+  const clearRecentSearchesButton = document.getElementById("clear-recent-searches");
+  const noResultsTerm = document.getElementById("no-results-term");
+  const clearSearchResultsButton = document.getElementById("clear-search-results");
+  const browseCategoriesButton = document.getElementById("browse-categories-button");
   const voiceSearchButton = document.getElementById("voice-search-btn");
   const cameraSearchButton = document.getElementById("camera-search-btn");
   const cameraSearchMenu = document.getElementById("camera-search-menu");
@@ -452,12 +501,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoryValue = homeCategorySelect?.value || "all";
     const filterValue = homeFilterSelect?.value || "all";
     const sortValue = homeSortSelect?.value || "featured";
+    const terms = query.split(/\s+/).filter(Boolean);
 
     const filteredCards = homeProductCards.filter((card) => {
       const product = window.getSidraProductFromCard(card);
-      const name = (product.name || "").toLowerCase();
+      const searchableText = [product.name, product.category, product.description, ...(product.keywords || [])]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const searchMatches = terms.every((term) => searchableText.includes(term));
       const category = (product.category || "").toLowerCase();
-      const searchMatches = !query || name.includes(query) || category.includes(query);
       const categoryMatches = categoryValue === "all" || category === categoryValue.toLowerCase();
       const filterMatches =
         filterValue === "all" ||
@@ -483,6 +536,108 @@ document.addEventListener("DOMContentLoaded", () => {
     if (homeEmptyState) {
       homeEmptyState.hidden = sorted.length > 0;
     }
+    if (noResultsTerm) {
+      noResultsTerm.textContent = query ? `“${homeSearchInput.value.trim()}”` : "the selected filters";
+    }
+  };
+
+  const RECENT_SEARCHES_KEY = "sidraCobeRecentSearches";
+  const readRecentSearches = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || "[]");
+      return Array.isArray(saved) ? saved.filter((term) => typeof term === "string").slice(0, 6) : [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const saveRecentSearch = (value) => {
+    const term = String(value || "").trim().replace(/\s+/g, " ");
+    if (!term) return;
+    const next = [term, ...readRecentSearches().filter((saved) => saved.toLowerCase() !== term.toLowerCase())].slice(0, 6);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+  };
+
+  const renderRecentSearches = () => {
+    if (!recentSearchList || !recentSearchSection) return;
+    const searches = readRecentSearches();
+    recentSearchList.replaceChildren();
+    searches.forEach((term) => {
+      const row = document.createElement("div");
+      row.className = "recent-search-row";
+      const searchButton = document.createElement("button");
+      searchButton.type = "button";
+      searchButton.className = "search-suggestion";
+      searchButton.dataset.searchValue = term;
+      searchButton.textContent = term;
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "remove-recent-search";
+      removeButton.dataset.removeSearch = term;
+      removeButton.setAttribute("aria-label", `Remove recent search ${term}`);
+      removeButton.textContent = "×";
+      row.append(searchButton, removeButton);
+      recentSearchList.appendChild(row);
+    });
+    recentSearchSection.hidden = searches.length === 0;
+  };
+
+  const renderSearchDropdown = (showRecent = false) => {
+    if (!searchDropdown || !searchSuggestions || !homeSearchInput) return;
+    const query = homeSearchInput.value.trim().toLowerCase();
+    searchSuggestions.innerHTML = "";
+    if (!query) {
+      renderRecentSearches();
+      const showDropdown = showRecent && readRecentSearches().length > 0;
+      searchDropdown.classList.toggle("hidden", !showDropdown);
+      homeSearchInput.setAttribute("aria-expanded", String(showDropdown));
+      if (clearSearchButton) clearSearchButton.hidden = true;
+      return;
+    }
+
+    if (clearSearchButton) clearSearchButton.hidden = false;
+    if (recentSearchSection) recentSearchSection.hidden = true;
+    const products = window.SIDRA_PRODUCTS || [];
+    const categories = [...new Set(products.map((product) => product.category).filter(Boolean))];
+    const matchingCategories = categories.filter((category) => category.toLowerCase().includes(query));
+    const suggestions = [
+      ...matchingCategories.map((label) => ({ label, type: "category" })),
+      ...products
+        .filter((product) => {
+          const productText = [product.name, product.category, product.description, ...(product.keywords || [])].filter(Boolean).join(" ").toLowerCase();
+          return productText.includes(query) || matchingCategories.includes(product.category);
+        })
+        .map((product) => ({ label: product.name, type: "product" }))
+    ].filter((item, index, all) => all.findIndex((candidate) => candidate.label === item.label) === index).slice(0, 7);
+
+    suggestions.forEach((suggestion) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "search-suggestion";
+      button.dataset.searchValue = suggestion.label;
+      button.dataset.searchType = suggestion.type;
+      button.textContent = suggestion.type === "category" ? `${suggestion.label} · Category` : suggestion.label;
+      searchSuggestions.appendChild(button);
+    });
+    const showDropdown = suggestions.length > 0;
+    searchDropdown.classList.toggle("hidden", !showDropdown);
+    homeSearchInput.setAttribute("aria-expanded", String(showDropdown));
+  };
+
+  const submitSearch = (value, type = "product") => {
+    if (!homeSearchInput) return;
+    const term = String(value || "").trim();
+    if (!term) return;
+    homeSearchInput.value = term;
+    if (type === "category" && homeCategorySelect) {
+      const matchingCategory = Array.from(homeCategorySelect.options).find((option) => option.value.toLowerCase() === term.toLowerCase());
+      if (matchingCategory) homeCategorySelect.value = matchingCategory.value;
+    }
+    saveRecentSearch(term);
+    applyHomeFilters();
+    renderSearchDropdown(false);
+    searchDropdown?.classList.add("hidden");
+    homeSearchInput.setAttribute("aria-expanded", "false");
   };
 
   const showAddedToast = () => {
@@ -534,7 +689,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          await navigator.mediaDevices.getUserMedia({ audio: true });
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach((track) => track.stop());
         }
       } catch (error) {
         setVoiceStatus("Microphone access was denied.");
@@ -564,7 +720,11 @@ document.addEventListener("DOMContentLoaded", () => {
             homeSearchInput.value = transcript;
           }
 
+          saveRecentSearch(transcript);
           applyHomeFilters();
+          renderSearchDropdown(false);
+          searchDropdown?.classList.add("hidden");
+          homeSearchInput?.setAttribute("aria-expanded", "false");
           setVoiceStatus(transcript, false);
         };
 
@@ -630,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (imagePreviewBox) {
           imagePreviewBox.classList.remove("hidden");
         }
-        setImageStatus("Image search is not available yet.");
+        setImageStatus("Visual search is not available yet.");
       };
       reader.readAsDataURL(file);
     });
@@ -672,7 +832,71 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  [homeSearchInput, homeSortSelect, homeCategorySelect, homeFilterSelect].forEach((control) => {
+  homeSearchInput?.addEventListener("input", () => {
+    applyHomeFilters();
+    renderSearchDropdown();
+  });
+  homeSearchInput?.addEventListener("focus", () => renderSearchDropdown(true));
+  homeSearchInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submitSearch(homeSearchInput.value);
+    }
+    if (event.key === "Escape") {
+      searchDropdown?.classList.add("hidden");
+      homeSearchInput.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  searchDropdown?.addEventListener("click", (event) => {
+    const removeButton = event.target.closest("[data-remove-search]");
+    if (removeButton) {
+      const term = removeButton.dataset.removeSearch;
+      const next = readRecentSearches().filter((saved) => saved !== term);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+      renderSearchDropdown(true);
+      return;
+    }
+    const suggestion = event.target.closest("[data-search-value]");
+    if (suggestion) submitSearch(suggestion.dataset.searchValue, suggestion.dataset.searchType);
+  });
+
+  clearRecentSearchesButton?.addEventListener("click", () => {
+    localStorage.setItem(RECENT_SEARCHES_KEY, "[]");
+    renderSearchDropdown(true);
+  });
+
+  clearSearchButton?.addEventListener("click", () => {
+    homeSearchInput.value = "";
+    applyHomeFilters();
+    renderSearchDropdown(true);
+    homeSearchInput.focus();
+  });
+
+  clearSearchResultsButton?.addEventListener("click", () => {
+    homeSearchInput.value = "";
+    applyHomeFilters();
+    renderSearchDropdown(false);
+    homeSearchInput.focus();
+  });
+
+  browseCategoriesButton?.addEventListener("click", () => {
+    homeSearchInput.value = "";
+    if (homeCategorySelect) homeCategorySelect.value = "all";
+    if (homeFilterSelect) homeFilterSelect.value = "all";
+    applyHomeFilters();
+    homeCategorySelect?.scrollIntoView({ behavior: "smooth", block: "center" });
+    homeCategorySelect?.focus();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (searchContainer && !searchContainer.contains(event.target)) {
+      searchDropdown?.classList.add("hidden");
+      homeSearchInput?.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  [homeSortSelect, homeCategorySelect, homeFilterSelect].forEach((control) => {
     if (control) {
       control.addEventListener("input", applyHomeFilters);
       control.addEventListener("change", applyHomeFilters);
@@ -804,5 +1028,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateCartCounts();
   updateWishlistCounts();
   syncWishlistButtons();
+  window.applySidraTranslation();
   applyHomeFilters();
 });

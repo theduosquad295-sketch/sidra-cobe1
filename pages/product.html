@@ -646,6 +646,8 @@
             return;
           }
 
+          localStorage.setItem("sidraCobeSelectedProduct", JSON.stringify({ id: String(product.id) }));
+
           const productPrice = safeNumber(product.price);
           const oldPrice = safeNumber(product.oldPrice || 0);
           const stock = safeNumber(product.stock || 0);

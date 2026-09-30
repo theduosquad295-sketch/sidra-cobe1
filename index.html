@@ -60,26 +60,40 @@
     <main class="home-page">
       <div class="container">
         <section class="home-controls" aria-label="Product controls">
-          <div class="search-wrap" aria-label="Search products">
-            <div class="search-main">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10.5 3a7.5 7.5 0 015.96 12.06l4.94 4.94 1.41-1.41-4.94-4.94A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" />
-              </svg>
-              <input id="home-search" type="search" placeholder="Search products" data-i18n-placeholder="search" aria-label="Search products" />
+          <div id="search-container" class="search-container">
+            <div class="search-wrap" aria-label="Search products">
+              <div class="search-main">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10.5 3a7.5 7.5 0 015.96 12.06l4.94 4.94 1.41-1.41-4.94-4.94A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" />
+                </svg>
+                <input id="home-search" type="search" placeholder="Search products" data-i18n-placeholder="search" aria-label="Search products" aria-controls="search-dropdown" aria-expanded="false" autocomplete="off" />
+                <button id="clear-search-button" class="clear-search-button" type="button" aria-label="Clear search" data-i18n-aria-label="clear-search" hidden>×</button>
+              </div>
+
+              <div class="search-actions" aria-label="Search actions">
+                <button id="voice-search-btn" class="search-action-btn" type="button" aria-label="Voice search">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a1 1 0 112 0 7 7 0 01-6 6.93V21h-2v-2.07A7 7 0 015 12a1 1 0 112 0 5 5 0 1010 0z" />
+                  </svg>
+                </button>
+
+                <button id="camera-search-btn" class="search-action-btn" type="button" aria-label="Image search">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9.5 3l1.5 2h2l1.5-2h3.5A2.5 2.5 0 0121 5.5v11A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5v-11A2.5 2.5 0 015.5 3h4zm2.5 7a3 3 0 110 6 3 3 0 010-6z" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            <div class="search-actions" aria-label="Search actions">
-              <button id="voice-search-btn" class="search-action-btn" type="button" aria-label="Voice search">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a1 1 0 112 0 7 7 0 01-6 6.93V21h-2v-2.07A7 7 0 015 12a1 1 0 112 0 5 5 0 1010 0z" />
-                </svg>
-              </button>
-
-              <button id="camera-search-btn" class="search-action-btn" type="button" aria-label="Image search">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M9.5 3l1.5 2h2l1.5-2h3.5A2.5 2.5 0 0121 5.5v11A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5v-11A2.5 2.5 0 015.5 3h4zm2.5 7a3 3 0 110 6 3 3 0 010-6z" />
-                </svg>
-              </button>
+            <div id="search-dropdown" class="search-dropdown hidden" role="region" aria-label="Search suggestions">
+              <section id="recent-search-section" class="recent-search-section" hidden>
+                <div class="search-panel-heading">
+                  <strong data-i18n="recent-searches">Recent searches</strong>
+                  <button id="clear-recent-searches" type="button" data-i18n="clear-all">Clear all</button>
+                </div>
+                <div id="recent-search-list"></div>
+              </section>
+              <div id="search-suggestions" role="listbox" aria-label="Matching products and categories"></div>
             </div>
           </div>
 
@@ -286,7 +300,14 @@
             </article>
           </div>
 
-          <div class="home-empty-state" hidden>No products match your search.</div>
+          <div class="home-empty-state" hidden>
+            <h2 data-i18n="no-products-found">No products found</h2>
+            <p>Search term: <strong id="no-results-term"></strong></p>
+            <div class="empty-search-actions">
+              <button id="clear-search-results" type="button" class="empty-action" data-i18n="clear-search">Clear search</button>
+              <button id="browse-categories-button" type="button" class="empty-action" data-i18n="browse-categories">Browse Categories</button>
+            </div>
+          </div>
         </section>
       </div>
     </main>

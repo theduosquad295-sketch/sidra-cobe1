@@ -227,7 +227,7 @@
 
       .field input {
         width: 100%;
-        min-height: 46px;
+        min-height: 50px;
         border: 1px solid var(--line);
         border-radius: 12px;
         background: var(--surface-soft);
@@ -235,7 +235,23 @@
         color: var(--text);
       }
 
-      .field input:focus {
+      .field textarea,
+      .field select {
+        width: 100%;
+        min-height: 50px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface-soft);
+        padding: 12px;
+        color: var(--text);
+        font: inherit;
+      }
+
+      .field textarea { min-height: 96px; resize: vertical; }
+
+      .field input:focus,
+      .field textarea:focus,
+      .field select:focus {
         outline: 2px solid rgba(17,17,17,0.08);
       }
 
@@ -256,9 +272,9 @@
 
       .order-item {
         display: grid;
-        grid-template-columns: 92px 1fr auto;
+        grid-template-columns: 72px minmax(0, 1fr) auto;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         padding: 10px 0;
       }
 
@@ -267,12 +283,10 @@
       }
 
       .item-image {
-        width: 92px;
-        height: 92px;
-        border-radius: 16px;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        width: 72px;
+        height: 88px;
+        border-radius: 12px;
+        object-fit: cover;
       }
 
       .item-name {
@@ -326,7 +340,41 @@
 
       .payment-option input {
         accent-color: var(--text);
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
       }
+
+      .payment-option.is-unavailable { opacity: 0.6; }
+      .payment-note { display: block; font-size: 0.78rem; }
+      .checkout-error {
+        min-height: 1.3em;
+        margin: 12px 0 0;
+        color: var(--danger);
+        font-size: 0.84rem;
+      }
+
+      .quantity-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+      }
+
+      .quantity-control button {
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+
+      .quantity-control button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .quantity-control strong { min-width: 20px; text-align: center; }
+
+      .checkout-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
       .payment-title {
         display: block;
@@ -382,12 +430,16 @@
             <div class="section-label">Delivery Address</div>
 
             <div class="address-card">
-              <button id="add-address-btn" type="button" class="ghost-btn">+ Add Address</button>
+              <button id="add-address-btn" type="button" class="ghost-btn">Clear address fields</button>
 
               <div id="saved-address-box" class="saved-address hidden">
                 <div class="saved-address-header">
                   <strong>Saved Address</strong>
                   <button id="change-address-btn" type="button" class="link-btn">Change</button>
+                </div>
+                <div class="field">
+                  <label for="saved-address-select">Use a saved address</label>
+                  <select id="saved-address-select" aria-label="Select a saved address"></select>
                 </div>
                 <div id="saved-address-text" class="muted">No saved address available.</div>
               </div>
@@ -395,45 +447,44 @@
               <div id="address-form" class="section-block">
                 <div class="field-grid">
                   <div class="field">
-                    <label for="full-name">Name</label>
-                    <input id="full-name" type="text" placeholder="Enter your name" />
+                    <label for="full-name">Full Name</label>
+                    <input id="full-name" type="text" autocomplete="name" placeholder="Enter your full name" required />
                     <span id="full-name-error" class="error">Name is required.</span>
                   </div>
 
                   <div class="field">
-                    <label for="mobile">Phone</label>
-                    <input id="mobile" type="tel" placeholder="Enter phone number" />
-                    <span id="mobile-error" class="error">Phone is required.</span>
+                    <label for="mobile">Mobile Number</label>
+                    <input id="mobile" type="tel" inputmode="tel" autocomplete="tel" placeholder="10-digit Indian mobile number" required />
+                    <span id="mobile-error" class="error">Enter a valid Indian mobile number.</span>
                   </div>
 
                   <div class="field full-width">
-                    <label for="house">Full Address</label>
-                    <input id="house" type="text" placeholder="House no., street, area" />
-                    <span id="house-error" class="error">Address is required.</span>
+                    <label for="house">Complete Address</label>
+                    <textarea id="house" autocomplete="street-address" placeholder="House / building, street, locality" required></textarea>
+                    <span id="house-error" class="error">Complete address is required.</span>
                   </div>
 
                   <div class="field">
-                    <label for="street">Street / Area</label>
-                    <input id="street" type="text" placeholder="Street / Area" />
-                    <span id="street-error" class="error">Street / Area is required.</span>
+                    <label for="street">Landmark / Address line 2 (optional)</label>
+                    <input id="street" type="text" autocomplete="address-line2" placeholder="Landmark or address line 2" />
                   </div>
 
                   <div class="field">
                     <label for="city">City</label>
-                    <input id="city" type="text" placeholder="City" />
+                    <input id="city" type="text" autocomplete="address-level2" placeholder="City" required />
                     <span id="city-error" class="error">City is required.</span>
                   </div>
 
                   <div class="field">
                     <label for="state">State</label>
-                    <input id="state" type="text" placeholder="State" />
+                    <input id="state" type="text" autocomplete="address-level1" placeholder="State" required />
                     <span id="state-error" class="error">State is required.</span>
                   </div>
 
                   <div class="field">
                     <label for="pin">PIN Code</label>
-                    <input id="pin" type="text" placeholder="PIN code" />
-                    <span id="pin-error" class="error">PIN code is required.</span>
+                    <input id="pin" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="6-digit PIN code" required />
+                    <span id="pin-error" class="error">Enter a valid 6-digit Indian PIN code.</span>
                   </div>
 
                   <div class="field">
@@ -444,17 +495,6 @@
               </div>
             </div>
 
-            <div class="checkout-footer">
-              <div class="section-label" style="margin-top: 18px;">Payment Method</div>
-              <label class="payment-option">
-                <input type="radio" name="payment-method" value="Cash on Delivery" checked />
-                <span>
-                  <span class="payment-title">Cash on Delivery</span>
-                  <span class="muted">Pay when your order is delivered.</span>
-                </span>
-              </label>
-              <div id="payment-error" class="error visible" style="margin-top: 8px;">Please choose a payment method.</div>
-            </div>
           </section>
 
           <aside class="card">
@@ -481,11 +521,29 @@
               </div>
             </div>
 
-            <div style="margin-top: 18px;">
-              <button id="place-order" type="button" class="checkout-btn">Place Order</button>
-            </div>
           </aside>
         </div>
+
+        <section class="card checkout-footer">
+          <div class="section-label">Payment Method</div>
+          <label class="payment-option">
+            <input type="radio" name="payment-method" value="Cash on Delivery" checked />
+            <span>
+              <span class="payment-title">Cash on Delivery</span>
+              <span class="muted">Pay when your order is delivered.</span>
+            </span>
+          </label>
+          <label class="payment-option is-unavailable" style="margin-top: 10px;">
+            <input type="radio" name="payment-method" value="Online Payment" disabled />
+            <span>
+              <span class="payment-title">Online Payment</span>
+              <span class="muted payment-note">Not configured yet</span>
+            </span>
+          </label>
+          <div id="payment-error" class="error" style="margin-top: 8px;">Select an available payment method.</div>
+          <button id="place-order" type="button" class="checkout-btn" style="margin-top: 18px;">Place Order</button>
+          <p id="checkout-error" class="checkout-error" role="alert" aria-live="polite"></p>
+        </section>
       </div>
     </main>
 
@@ -527,23 +585,61 @@
           return Array.isArray(saved) ? saved : [];
         }
 
+        function getCatalogProduct(productId) {
+          return window.getSidraProductById ? window.getSidraProductById(productId) : null;
+        }
+
+        function normalizeCheckoutItem(item, index) {
+          if (!item || !item.id) return null;
+          const product = getCatalogProduct(item.id);
+          if (!product) return null;
+
+          return {
+            id: String(product.id),
+            name: product.name,
+            category: product.category || "Featured",
+            price: safeNumber(product.price),
+            quantity: Number(item.quantity),
+            imageClass: product.imageClass || "media-one",
+            stock: Number.isFinite(Number(product.stock)) ? safeNumber(product.stock) : null,
+            size: String(item.size || ""),
+            variant: String(item.variant || ""),
+            lineIndex: index
+          };
+        }
+
+        function readStoredCart() {
+          for (const key of CART_KEYS) {
+            const cart = readJSON(key, null);
+            if (Array.isArray(cart)) return cart;
+          }
+          return [];
+        }
+
+        function saveStoredCart(cart) {
+          const payload = JSON.stringify(cart);
+          CART_KEYS.forEach((key) => localStorage.setItem(key, payload));
+        }
+
         function getCheckoutState() {
           const buyNow = readJSON(BUY_NOW_KEY, null);
-          if (buyNow && buyNow.product) return buyNow;
-
-          for (const key of CART_KEYS) {
-            try {
-              const raw = localStorage.getItem(key);
-              if (!raw) continue;
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed) && parsed.length) {
-                const firstItem = parsed[0];
-                return { product: firstItem, quantity: safeNumber(firstItem.quantity) || 1 };
-              }
-            } catch (error) {}
+          if (buyNow && buyNow.product) {
+            const item = normalizeCheckoutItem({
+              ...buyNow.product,
+              quantity: buyNow.quantity,
+              size: buyNow.size || buyNow.product.size,
+              variant: buyNow.variant || buyNow.product.variant
+            }, 0);
+            return {
+              isBuyNow: true,
+              items: item ? [item] : [],
+              invalidItemCount: item ? 0 : 1
+            };
           }
 
-          return null;
+          const cart = readStoredCart();
+          const items = cart.map(normalizeCheckoutItem).filter(Boolean);
+          return { isBuyNow: false, items, invalidItemCount: cart.length - items.length };
         }
 
         function getItemImagePath(item) {
@@ -568,11 +664,20 @@
           const addresses = readAddresses();
           const box = document.getElementById("saved-address-box");
           const text = document.getElementById("saved-address-text");
+          const select = document.getElementById("saved-address-select");
 
           if (!addresses.length) {
             box.classList.add("hidden");
             return;
           }
+
+          select.innerHTML = '<option value="">Choose a saved address</option>';
+          addresses.forEach((address, index) => {
+            const option = document.createElement("option");
+            option.value = String(index);
+            option.textContent = [address.fullName, address.city, address.state].filter(Boolean).join(" · ") || `Saved address ${index + 1}`;
+            select.appendChild(option);
+          });
 
           const address = addresses[0];
           const summary = `${address.fullName || "Customer"}\n${address.mobile || "Phone not added"}\n${[address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join(", ") || "Address not added"}`;
@@ -592,45 +697,84 @@
           document.getElementById("state").value = address.state || "";
           document.getElementById("pin").value = address.pin || "";
           document.getElementById("email").value = address.email || "";
+          document.getElementById("address-form").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function calculateTotals(items) {
+          const subtotal = items.reduce((sum, item) => sum + safeNumber(item.price) * safeNumber(item.quantity), 0);
+          const shipping = 0;
+          const discount = 0;
+          return { subtotal, shipping, discount, total: subtotal + shipping - discount };
         }
 
         function renderSummary() {
           const state = getCheckoutState();
-          const item = state?.product || null;
-          const qty = safeNumber(state?.quantity || 1);
+          const items = state?.items || [];
+          const summaryItems = document.getElementById("summary-items");
+          const placeOrder = document.getElementById("place-order");
+          const error = document.getElementById("checkout-error");
+          const totals = calculateTotals(items);
 
-          if (!item) {
-            document.getElementById("summary-items").innerHTML = '<div class="muted">No item selected for checkout.</div>';
+          document.getElementById("subtotal").textContent = formatCurrency(totals.subtotal);
+          document.getElementById("shipping").textContent = formatCurrency(totals.shipping);
+          document.getElementById("discount").textContent = "-" + formatCurrency(totals.discount);
+          document.getElementById("total").textContent = formatCurrency(totals.total);
+
+          if (!items.length) {
+            summaryItems.innerHTML = '<div class="muted">No valid product is available for checkout.</div>';
+            placeOrder.disabled = true;
+            error.textContent = state?.invalidItemCount ? "A cart product could not be matched to the current catalog." : "";
             return;
           }
 
-          const itemTotal = safeNumber(item.price) * qty;
-          const subtotal = itemTotal;
-          const shipping = subtotal >= 2200 ? 0 : 199;
-          const discount = subtotal > 0 ? Math.min(Math.round(subtotal * 0.08), 500) : 0;
-          const total = subtotal + shipping - discount;
+          placeOrder.disabled = Boolean(state.invalidItemCount);
+          error.textContent = state.invalidItemCount ? "Some cart products could not be matched to the current catalog. Return to your cart and refresh it." : "";
 
-          document.getElementById("subtotal").textContent = formatCurrency(subtotal);
-          document.getElementById("shipping").textContent = formatCurrency(shipping);
-          document.getElementById("discount").textContent = "-" + formatCurrency(discount);
-          document.getElementById("total").textContent = formatCurrency(total);
+          summaryItems.innerHTML = items.map((item) => {
+            const itemTotal = safeNumber(item.price) * safeNumber(item.quantity);
+            const imagePath = getItemImagePath(item);
+            const options = [item.size && `Size: ${item.size}`, item.variant && `Variant: ${item.variant}`].filter(Boolean).join(" · ");
+            const maxQuantity = item.stock === null ? Number.POSITIVE_INFINITY : item.stock;
+            return `
+              <article class="order-item">
+                <img class="item-image" src="${imagePath}" alt="${item.name}" loading="lazy" />
+                <div>
+                  <p class="item-name">${item.name}</p>
+                  <div class="item-meta">${formatCurrency(item.price)} each · ${formatCurrency(itemTotal)}</div>
+                  <div class="item-meta">${item.category}${options ? ` · ${options}` : ""}</div>
+                  <div class="quantity-control" aria-label="Quantity for ${item.name}">
+                    <button type="button" data-quantity-action="decrease" data-quantity-index="${item.lineIndex}" aria-label="Decrease ${item.name} quantity" ${item.quantity <= 1 ? "disabled" : ""}>−</button>
+                    <strong>${item.quantity}</strong>
+                    <button type="button" data-quantity-action="increase" data-quantity-index="${item.lineIndex}" aria-label="Increase ${item.name} quantity" ${item.quantity >= maxQuantity ? "disabled" : ""}>+</button>
+                  </div>
+                </div>
+              </article>
+            `;
+          }).join("");
+        }
 
-          const imagePath = getItemImagePath(item);
-          document.getElementById("summary-items").innerHTML = `
-            <article class="order-item">
-              <div class="item-image" style="background-image: linear-gradient(135deg, rgba(17,17,17,0.08), rgba(17,17,17,0.04)), url('${imagePath}')"></div>
-              <div>
-                <p class="item-name">${item.name || "Product"}</p>
-                <div class="item-meta">Qty: ${qty}</div>
-                <div class="item-meta">${item.category || "Featured"}</div>
-              </div>
-              <div class="item-total">${formatCurrency(itemTotal)}</div>
-            </article>
-          `;
+        function updateQuantity(lineIndex, delta) {
+          const state = getCheckoutState();
+          const item = state?.items.find((entry) => entry.lineIndex === Number(lineIndex));
+          if (!item || !Number.isInteger(item.quantity)) return;
 
-          document.body.dataset.orderTotal = String(total);
-          document.body.dataset.productName = item.name || "Product";
-          document.body.dataset.productImage = item.imageClass || "media-one";
+          const nextQuantity = item.quantity + delta;
+          if (nextQuantity < 1 || (item.stock !== null && nextQuantity > item.stock)) return;
+
+          if (state.isBuyNow) {
+            const buyNow = readJSON(BUY_NOW_KEY, null);
+            if (!buyNow?.product) return;
+            buyNow.quantity = nextQuantity;
+            localStorage.setItem(BUY_NOW_KEY, JSON.stringify(buyNow));
+          } else {
+            const cart = readStoredCart();
+            if (!cart[Number(lineIndex)]) return;
+            cart[Number(lineIndex)].quantity = nextQuantity;
+            saveStoredCart(cart);
+          }
+
+          renderSummary();
+          updateCartBadges();
         }
 
         function clearErrors() {
@@ -639,16 +783,14 @@
 
         function validate() {
           clearErrors();
+          document.getElementById("checkout-error").textContent = "";
           let valid = true;
 
           const fields = [
             ["full-name", "full-name-error"],
-            ["mobile", "mobile-error"],
             ["house", "house-error"],
-            ["street", "street-error"],
             ["city", "city-error"],
-            ["state", "state-error"],
-            ["pin", "pin-error"]
+            ["state", "state-error"]
           ];
 
           fields.forEach(([fieldId, errorId]) => {
@@ -659,8 +801,21 @@
             }
           });
 
+          const mobileInput = document.getElementById("mobile");
+          const mobileDigits = mobileInput.value.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+          if (!/^[6-9]\d{9}$/.test(mobileDigits)) {
+            document.getElementById("mobile-error").classList.add("visible");
+            valid = false;
+          }
+
+          const pin = document.getElementById("pin").value.trim();
+          if (!/^[1-9]\d{5}$/.test(pin)) {
+            document.getElementById("pin-error").classList.add("visible");
+            valid = false;
+          }
+
           const paymentSelected = document.querySelector('input[name="payment-method"]:checked');
-          if (!paymentSelected) {
+          if (!paymentSelected || paymentSelected.disabled || paymentSelected.value !== "Cash on Delivery") {
             document.getElementById("payment-error").classList.add("visible");
             valid = false;
           } else {
@@ -668,25 +823,49 @@
           }
 
           const state = getCheckoutState();
-          if (!state || !state.product) {
+          if (!state?.items.length || state.invalidItemCount) {
+            document.getElementById("checkout-error").textContent = "Your products are unavailable. Return to your cart and try again.";
             valid = false;
+          } else {
+            state.items.forEach((item) => {
+              const product = getCatalogProduct(item.id);
+              if (!Number.isInteger(item.quantity) || item.quantity < 1 || (item.stock !== null && item.quantity > item.stock)) {
+                document.getElementById("checkout-error").textContent = "Check product quantities against current stock.";
+                valid = false;
+              } else if (String(product.category || "").toLowerCase() === "clothing" && !["S", "M", "L", "XL", "XXL"].includes(item.size)) {
+                document.getElementById("checkout-error").textContent = `Select a size for ${product.name} on its product page.`;
+                valid = false;
+              } else {
+                const variants = Array.isArray(product.variants) ? product.variants : [];
+                const variantNames = variants.map((variant) => String(variant.name || variant));
+                if (variants.length && !variantNames.includes(item.variant)) {
+                  document.getElementById("checkout-error").textContent = `Select a variant for ${product.name} on its product page.`;
+                  valid = false;
+                }
+              }
+            });
           }
 
           return valid;
         }
 
-        function buildOrder() {
-          const state = getCheckoutState();
-          const item = state?.product;
-          const qty = safeNumber(state?.quantity || 1);
-          const total = safeNumber(document.body.dataset.orderTotal || 0);
-          const payment = document.querySelector('input[name="payment-method"]:checked')?.value || "Cash on Delivery";
+        function buildOrder(state) {
+          const items = state.items;
+          const firstItem = items[0] || {};
+          const quantity = items.reduce((sum, item) => sum + safeNumber(item.quantity), 0);
+          const totals = calculateTotals(items);
+          const total = totals.total;
+          const payment = "Cash on Delivery";
           const orderNumber = "SIDRA-" + Date.now().toString().slice(-6);
           const orderDate = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-          const address = {
+          const mobileDigits = document.getElementById("mobile").value.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+          const customer = {
             fullName: document.getElementById("full-name").value.trim(),
-            mobile: document.getElementById("mobile").value.trim(),
-            email: document.getElementById("email").value.trim(),
+            mobile: mobileDigits,
+            email: document.getElementById("email").value.trim()
+          };
+          const address = {
+            ...customer,
             house: document.getElementById("house").value.trim(),
             street: document.getElementById("street").value.trim(),
             city: document.getElementById("city").value.trim(),
@@ -696,21 +875,42 @@
 
           return {
             orderNumber,
+            orderId: orderNumber,
             date: orderDate,
-            products: `${item?.name || "Product"}`,
-            productName: item?.name || "Product",
-            productImage: item?.imageClass || "media-one",
-            quantity: qty,
+            createdAt: new Date().toISOString(),
+            products: items.map((item) => `${item.name || "Product"} (Qty ${safeNumber(item.quantity)})`).join(", "),
+            productName: firstItem.name || "Product",
+            productImage: firstItem.imageClass || "media-one",
+            quantity,
+            items: items.map((item) => ({
+              id: String(item.id || ""),
+              name: item.name || "Product",
+              category: item.category || "Featured",
+              price: safeNumber(item.price),
+              quantity: safeNumber(item.quantity),
+              imageClass: item.imageClass || "media-one",
+              size: item.size || "",
+              variant: item.variant || "",
+              lineTotal: safeNumber(item.price) * safeNumber(item.quantity)
+            })),
             total: formatCurrency(total),
-            subtotal: formatCurrency(safeNumber(item?.price) * qty),
-            paymentStatus: payment,
+            subtotal: formatCurrency(totals.subtotal),
+            subtotalValue: totals.subtotal,
+            shipping: formatCurrency(totals.shipping),
+            shippingCharge: totals.shipping,
+            discount: formatCurrency(totals.discount),
+            discountValue: totals.discount,
+            finalTotal: total,
+            customer,
+            paymentStatus: "Pending",
+            paymentLabel: "Cash on Delivery / Pending",
             paymentMethod: payment,
-            status: "Confirmed",
+            status: "Order Placed",
             statusClass: "",
             address,
-            itemId: String(item?.id || ""),
+            itemId: String(firstItem.id || ""),
+            itemIds: items.map((item) => String(item.id || "")),
             totalValue: total,
-            createdAt: new Date().toISOString()
           };
         }
 
@@ -741,17 +941,43 @@
           return notification;
         }
 
+        function removePurchasedCartItems(purchasedItems) {
+          const cart = readStoredCart();
+          purchasedItems.forEach((purchasedItem) => {
+            const index = cart.findIndex((item) =>
+              String(item.id) === String(purchasedItem.id) &&
+              String(item.size || "") === String(purchasedItem.size || "") &&
+              String(item.variant || "") === String(purchasedItem.variant || "")
+            );
+            if (index < 0) return;
+
+            const remaining = safeNumber(cart[index].quantity) - safeNumber(purchasedItem.quantity);
+            if (remaining > 0) {
+              cart[index].quantity = remaining;
+            } else {
+              cart.splice(index, 1);
+            }
+          });
+          saveStoredCart(cart);
+        }
+
         function finalizeOrder() {
           if (!validate()) return;
 
-          const order = buildOrder();
+          const checkoutState = getCheckoutState();
+          const order = buildOrder(checkoutState);
           const orders = readJSON(ORDER_KEY, []);
           const nextOrders = Array.isArray(orders) ? [order, ...orders] : [order];
           saveJSON(ORDER_KEY, nextOrders);
 
           createAdminNotification(order);
           localStorage.setItem("sidraCobeLastOrder", JSON.stringify(order));
-          localStorage.removeItem(BUY_NOW_KEY);
+          if (checkoutState.isBuyNow) {
+            localStorage.removeItem(BUY_NOW_KEY);
+          } else {
+            removePurchasedCartItems(checkoutState.items);
+          }
+          updateCartBadges();
 
           if (window.sidraSendOrderEventToBackend) {
             window.sidraSendOrderEventToBackend(order).catch(function () {
@@ -773,9 +999,11 @@
         }
 
         function updateCartBadges() {
-          const cart = readJSON(CART_KEYS[0], []);
-          const total = Array.isArray(cart) ? cart.reduce((sum, item) => sum + safeNumber(item.quantity), 0) : 0;
+          const cart = readStoredCart();
+          const total = cart.reduce((sum, item) => sum + safeNumber(item.quantity), 0);
           document.querySelectorAll(".cart-count").forEach((node) => { node.textContent = String(total); });
+          const wishlist = readJSON("sidraCobeWishlist", []);
+          document.querySelectorAll(".wishlist-count").forEach((node) => { node.textContent = String(Array.isArray(wishlist) ? wishlist.length : 0); });
         }
 
         function initialize() {
@@ -790,6 +1018,19 @@
             });
           }
 
+          document.addEventListener("click", (event) => {
+            const quantityButton = event.target.closest("[data-quantity-action]");
+            if (!quantityButton) return;
+            updateQuantity(quantityButton.dataset.quantityIndex, quantityButton.dataset.quantityAction === "increase" ? 1 : -1);
+          });
+
+          window.addEventListener("storage", (event) => {
+            if (CART_KEYS.includes(event.key) || event.key === BUY_NOW_KEY) {
+              renderSummary();
+              updateCartBadges();
+            }
+          });
+
           document.getElementById("change-address-btn").addEventListener("click", () => {
             document.getElementById("saved-address-box").classList.add("hidden");
             document.getElementById("address-form").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -800,6 +1041,9 @@
             ["full-name", "mobile", "house", "street", "city", "state", "pin", "email"].forEach((id) => {
               document.getElementById(id).value = "";
             });
+            if (savedAddressSelect) savedAddressSelect.value = "";
+            clearErrors();
+            document.getElementById("checkout-error").textContent = "";
             document.getElementById("address-form").scrollIntoView({ behavior: "smooth", block: "start" });
           });
 

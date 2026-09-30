@@ -31,7 +31,7 @@
       button { cursor: pointer; }
       img { max-width: 100%; display: block; }
 
-      .container { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+      .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 18px; }
 
       .site-header {
         position: sticky;
@@ -177,9 +177,7 @@
         width: 100%;
         height: 116px;
         border-radius: 16px;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        object-fit: cover;
       }
 
       .item-body {
@@ -202,9 +200,9 @@
 
       .qty-row {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
         margin-top: auto;
       }
 
@@ -218,8 +216,8 @@
       }
 
       .qty-button {
-        width: 32px;
-        height: 32px;
+        width: 44px;
+        height: 44px;
         border: none;
         background: transparent;
         color: var(--text);
@@ -228,7 +226,7 @@
       }
 
       .qty-value {
-        min-width: 20px;
+        min-width: 28px;
         text-align: center;
         font-weight: 800;
       }
@@ -246,7 +244,14 @@
         background: transparent;
         color: var(--muted);
         font-weight: 700;
-        padding: 0;
+        min-height: 40px;
+        padding: 0 4px;
+      }
+
+      .item-options {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.84rem;
       }
 
       .summary-box {
@@ -374,11 +379,26 @@
       }
 
       @media (min-width: 700px) {
-        .container { max-width: 760px; }
+        .container { max-width: 960px; }
         .cart-item {
           grid-template-columns: 130px 1fr;
         }
         .page { padding-top: 28px; }
+        .qty-row {
+          align-items: center;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+        .page > .container {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+          align-items: start;
+          gap: 18px;
+        }
+        #cart-feedback,
+        #cart-empty { grid-column: 1 / -1; }
+        .summary-box { position: sticky; top: 92px; margin-top: 0; }
+        .checkout-bar { display: none; }
       }
     </style>
   </head>
@@ -540,7 +560,9 @@
               name: item.name || "Product",
               category: item.category || "Featured",
               price: safeNumber(item.price),
-              imageClass: item.imageClass || "media-one"
+              imageClass: item.imageClass || "media-one",
+              size: item.size || "",
+              variant: item.variant || ""
             });
           });
           localStorage.setItem(WISHLIST_KEY, JSON.stringify(unique));
@@ -595,7 +617,7 @@
 
         function calculateTotals(cart) {
           const subtotal = cart.reduce((sum, item) => sum + safeNumber(item.price) * safeNumber(item.quantity), 0);
-          const delivery = subtotal > 0 ? 0 : 0;
+          const delivery = 0;
           const discount = 0;
           const total = Math.max(subtotal + delivery - discount, 0);
           return { subtotal, delivery, discount, total };
@@ -638,22 +660,23 @@
           cartItems.innerHTML = cart.map((item) => {
             const imagePath = getImagePath(item);
             const productMeta = getProductMeta(item.id);
-            const maxQty = productMeta && productMeta.stock ? safeNumber(productMeta.stock) : 999;
+            const maxQty = productMeta && Number.isFinite(Number(productMeta.stock)) ? Math.max(1, safeNumber(productMeta.stock)) : 999;
             return `
               <article class="cart-item" data-id="${item.id}">
-                <div class="item-image" style="background-image: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.1)), url('${imagePath}')"></div>
+                <img class="item-image" src="${imagePath}" alt="${item.name}" loading="lazy" />
                 <div class="item-body">
                   <h2 class="item-name">${item.name}</h2>
                   <div class="item-price">${formatPrice(item.price)}</div>
+                  ${item.size || item.variant ? `<p class="item-options">${[item.size && `Size: ${item.size}`, item.variant && `Variant: ${item.variant}`].filter(Boolean).join(" · ")}</p>` : ""}
                   <div class="qty-row">
                     <div class="quantity-control" aria-label="Quantity selector">
-                      <button type="button" class="qty-button" data-action="decrease" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+                      <button type="button" class="qty-button" data-action="decrease" data-line-index="${cart.indexOf(item)}" aria-label="Decrease quantity" ${item.quantity <= 1 ? "disabled" : ""}>−</button>
                       <span class="qty-value">${item.quantity}</span>
-                      <button type="button" class="qty-button" data-action="increase" data-id="${item.id}" aria-label="Increase quantity" ${item.quantity >= maxQty ? "disabled" : ""}>+</button>
+                      <button type="button" class="qty-button" data-action="increase" data-line-index="${cart.indexOf(item)}" aria-label="Increase quantity" ${item.quantity >= maxQty ? "disabled" : ""}>+</button>
                     </div>
                     <div class="item-actions">
-                      <button type="button" class="move-link" data-action="move-to-wishlist" data-id="${item.id}">Move to Wishlist</button>
-                      <button type="button" class="remove-link" data-action="remove" data-id="${item.id}">Remove</button>
+                      <button type="button" class="move-link" data-action="move-to-wishlist" data-line-index="${cart.indexOf(item)}">Move to Wishlist</button>
+                      <button type="button" class="remove-link" data-action="remove" data-line-index="${cart.indexOf(item)}">Remove</button>
                     </div>
                   </div>
                 </div>
@@ -662,22 +685,23 @@
           }).join("");
         }
 
-        function adjustQuantity(productId, delta) {
+        function adjustQuantity(lineIndex, delta) {
           const cart = readCart();
-          const target = cart.find((item) => String(item.id) === String(productId));
+          const target = cart[Number(lineIndex)];
           if (!target) return;
 
-          const productMeta = getProductMeta(productId);
-          const stock = productMeta && productMeta.stock ? safeNumber(productMeta.stock) : 0;
+          const productMeta = getProductMeta(target.id);
+          const stockKnown = productMeta && Number.isFinite(Number(productMeta.stock));
+          const stock = stockKnown ? Math.max(0, safeNumber(productMeta.stock)) : Number.POSITIVE_INFINITY;
           const nextQuantity = safeNumber(target.quantity) + delta;
           const minQty = 1;
-          const maxQty = stock > 0 ? stock : Number.POSITIVE_INFINITY;
+          const maxQty = stockKnown ? Math.max(1, stock) : Number.POSITIVE_INFINITY;
 
           if (nextQuantity < minQty) {
             return;
           }
 
-          if (stock > 0 && nextQuantity > maxQty) {
+          if (nextQuantity > maxQty) {
             return;
           }
 
@@ -686,31 +710,38 @@
           renderCart();
         }
 
-        function removeItem(productId) {
-          const nextCart = readCart().filter((item) => String(item.id) !== String(productId));
+        function removeItem(lineIndex) {
+          const nextCart = readCart();
+          nextCart.splice(Number(lineIndex), 1);
           saveCart(nextCart);
           renderCart();
           setFeedback("Item removed from cart.");
         }
 
-        function moveToWishlist(productId) {
+        function moveToWishlist(lineIndex) {
           const cart = readCart();
-          const item = cart.find((entry) => String(entry.id) === String(productId));
+          const item = cart[Number(lineIndex)];
           if (!item) return;
 
           const wishlist = readWishlist();
-          const exists = wishlist.some((entry) => String(entry.id) === String(productId));
-          if (!exists) {
+          const existingWishlistItem = wishlist.find((entry) => String(entry.id) === String(item.id));
+          if (existingWishlistItem) {
+            existingWishlistItem.size = item.size || existingWishlistItem.size || "";
+            existingWishlistItem.variant = item.variant || existingWishlistItem.variant || "";
+          } else {
             wishlist.push({
               id: String(item.id),
               name: item.name,
               category: item.category || "Featured",
               price: safeNumber(item.price),
-              imageClass: item.imageClass || "media-one"
+              imageClass: item.imageClass || "media-one",
+              size: item.size || "",
+              variant: item.variant || ""
             });
           }
           saveWishlist(wishlist);
-          saveCart(cart.filter((entry) => String(entry.id) !== String(productId)));
+          cart.splice(Number(lineIndex), 1);
+          saveCart(cart);
           renderCart();
           setFeedback("Moved to wishlist.");
         }
@@ -720,16 +751,16 @@
           if (!trigger) return;
 
           const action = trigger.dataset.action;
-          const productId = trigger.dataset.id;
+          const lineIndex = trigger.dataset.lineIndex;
 
           if (action === "increase") {
-            adjustQuantity(productId, 1);
+            adjustQuantity(lineIndex, 1);
           } else if (action === "decrease") {
-            adjustQuantity(productId, -1);
+            adjustQuantity(lineIndex, -1);
           } else if (action === "remove") {
-            removeItem(productId);
+            removeItem(lineIndex);
           } else if (action === "move-to-wishlist") {
-            moveToWishlist(productId);
+            moveToWishlist(lineIndex);
           }
         });
 
@@ -744,19 +775,16 @@
           status.textContent = "Coupon system is not connected yet. No discount has been applied.";
         });
 
-        document.getElementById("checkout-button").addEventListener("click", () => {
+        function proceedToCheckout() {
           if (!readCart().length) {
             return;
           }
+          localStorage.removeItem("sidraCobeBuyNow");
           window.location.href = "checkout.html";
-        });
+        }
 
-        document.getElementById("checkout-bar-button").addEventListener("click", () => {
-          if (!readCart().length) {
-            return;
-          }
-          window.location.href = "checkout.html";
-        });
+        document.getElementById("checkout-button").addEventListener("click", proceedToCheckout);
+        document.getElementById("checkout-bar-button").addEventListener("click", proceedToCheckout);
 
         renderCart();
       })();

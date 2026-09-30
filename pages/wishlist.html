@@ -30,7 +30,7 @@
       button { cursor: pointer; }
       img { max-width: 100%; display: block; }
 
-      .container { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+      .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 18px; }
 
       .site-header {
         position: sticky;
@@ -149,10 +149,10 @@
       }
 
       .product-image {
-        height: 170px;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        display: block;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
       }
 
       .product-info {
@@ -171,16 +171,29 @@
         margin: 0 0 10px;
       }
 
+      .product-options {
+        margin: -4px 0 10px;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
       .product-actions {
         display: grid;
         gap: 8px;
+      }
+
+      .wishlist-feedback {
+        min-height: 22px;
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 0.88rem;
       }
 
       .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 36px;
+        min-height: 44px;
         padding: 0 12px;
         border: 1px solid var(--line);
         border-radius: 10px;
@@ -201,8 +214,11 @@
       }
 
       @media (min-width: 700px) {
-        .container { max-width: 760px; }
+        .container { max-width: 1000px; }
         .wishlist-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+      @media (min-width: 1000px) {
+        .wishlist-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       }
     </style>
   </head>
@@ -222,6 +238,7 @@
 
     <main class="page">
       <div class="container">
+        <div id="wishlist-feedback" class="wishlist-feedback" aria-live="polite"></div>
         <div id="wishlist-empty" class="wishlist-empty hidden">
           <h2>Your Wishlist is Empty</h2>
           <p>Save your favorite pieces and come back anytime.</p>
@@ -264,7 +281,9 @@
               name: item.name || "Product",
               category: item.category || "Featured",
               price: safeNumber(item.price),
-              imageClass: item.imageClass || "media-one"
+              imageClass: item.imageClass || "media-one",
+              size: item.size || "",
+              variant: item.variant || ""
             }));
           } catch (error) {
             return [];
@@ -283,7 +302,9 @@
               name: item.name || "Product",
               category: item.category || "Featured",
               price: safeNumber(item.price),
-              imageClass: item.imageClass || "media-one"
+              imageClass: item.imageClass || "media-one",
+              size: item.size || "",
+              variant: item.variant || ""
             });
           });
           localStorage.setItem(WISHLIST_KEY, JSON.stringify(unique));
@@ -302,7 +323,9 @@
                 category: item.category || "Featured",
                 price: safeNumber(item.price),
                 quantity: safeNumber(item.quantity),
-                imageClass: item.imageClass || "media-one"
+                imageClass: item.imageClass || "media-one",
+                size: item.size || "",
+                variant: item.variant || ""
               }));
             } catch (error) { }
           }
@@ -316,7 +339,9 @@
             category: item.category || "Featured",
             price: safeNumber(item.price),
             quantity: safeNumber(item.quantity),
-            imageClass: item.imageClass || "media-one"
+            imageClass: item.imageClass || "media-one",
+            size: item.size || "",
+            variant: item.variant || ""
           })));
           CART_KEYS.forEach((key) => {
             try { localStorage.setItem(key, payload); } catch (error) { }
@@ -356,8 +381,22 @@
           const match = wishlist.find((item) => String(item.id) === String(productId));
           if (!match) return;
 
+          const product = window.getSidraProductById ? window.getSidraProductById(match.id) : null;
+          const needsSize = String(product?.category || match.category).toLowerCase() === "clothing";
+          const needsVariant = Array.isArray(product?.variants) && product.variants.length > 0;
+          if ((needsSize && !match.size) || (needsVariant && !match.variant)) {
+            document.getElementById("wishlist-feedback").textContent = "Choose the required size or variant on the product page before adding this item.";
+            window.location.href = `product.html?id=${encodeURIComponent(match.id)}`;
+            return;
+          }
+
           const cart = readCart();
-          const item = cart.find((entry) => String(entry.id) === String(match.id));
+          const item = cart.find((entry) => String(entry.id) === String(match.id) && (entry.size || "") === (match.size || "") && (entry.variant || "") === (match.variant || ""));
+          const stock = product && Number.isFinite(Number(product.stock)) ? Math.max(0, safeNumber(product.stock)) : Number.POSITIVE_INFINITY;
+          if (stock < 1 || (item && item.quantity >= stock)) {
+            document.getElementById("wishlist-feedback").textContent = "This item is not available in the requested quantity.";
+            return;
+          }
           if (item) {
             item.quantity = safeNumber(item.quantity) + 1;
           } else {
@@ -367,11 +406,14 @@
               category: match.category,
               price: match.price,
               quantity: 1,
-              imageClass: match.imageClass || "media-one"
+              imageClass: match.imageClass || "media-one",
+              size: match.size || "",
+              variant: match.variant || ""
             });
           }
           saveCart(cart);
           updateCounts();
+          document.getElementById("wishlist-feedback").textContent = "Added to cart. This item remains in your wishlist.";
         }
 
         function renderWishlist() {
@@ -392,10 +434,11 @@
             const imagePath = getImagePath(item);
             return `
               <article class="wishlist-item" data-id="${item.id}">
-                <div class="product-image" style="background-image: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.08)), url('${imagePath}')"></div>
+                <img class="product-image" src="${imagePath}" alt="${item.name}" loading="lazy" />
                 <div class="product-info">
                   <h3 class="product-name">${item.name}</h3>
                   <div class="product-price">${formatIndianCurrency(item.price)}</div>
+                  ${item.size || item.variant ? `<div class="product-options">${[item.size && `Size: ${item.size}`, item.variant && `Variant: ${item.variant}`].filter(Boolean).join(" · ")}</div>` : ""}
                   <div class="product-actions">
                     <button type="button" class="btn primary" data-action="add-to-cart" data-id="${item.id}">Add to Cart</button>
                     <button type="button" class="btn secondary" data-action="remove" data-id="${item.id}">Remove</button>
@@ -417,6 +460,7 @@
           if (action === "remove") {
             saveWishlist(wishlist.filter((item) => String(item.id) !== String(productId)));
             renderWishlist();
+            document.getElementById("wishlist-feedback").textContent = "Removed from wishlist.";
             return;
           }
 

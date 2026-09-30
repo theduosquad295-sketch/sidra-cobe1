@@ -30,7 +30,7 @@
       button { cursor: pointer; }
       img { max-width: 100%; display: block; }
 
-      .container { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+      .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 18px; }
 
       .site-header {
         position: sticky;
@@ -150,6 +150,8 @@
         gap: 10px;
       }
 
+      .profile-option { min-height: 64px; }
+
       .orders-box {
         margin-top: 18px;
         display: grid;
@@ -172,6 +174,10 @@
       .profile-order small {
         color: var(--muted);
       }
+
+      .profile-order-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+      .profile-order-actions a,
+      .address-actions button { min-height: 40px; display: inline-flex; align-items: center; color: var(--text); font-weight: 700; }
 
       .profile-option {
         width: 100%;
@@ -226,6 +232,8 @@
 
       .modal-card {
         width: min(100%, 480px);
+        max-height: min(90vh, 760px);
+        overflow-y: auto;
         background: var(--surface);
         border-radius: 24px 24px 0 0;
         padding: 20px 18px 22px;
@@ -269,6 +277,21 @@
         text-align: left;
         font-weight: 700;
       }
+
+      .address-list { display: grid; gap: 10px; margin-bottom: 16px; }
+      .address-entry { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; }
+      .address-entry p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+      .address-actions { display: flex; gap: 14px; }
+      .address-actions button { border: 0; background: none; padding: 0; }
+      .address-form { display: grid; gap: 10px; }
+      .address-form input,
+      .address-form textarea { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--text); }
+      .address-form textarea { min-height: 88px; resize: vertical; }
+      .address-form label { color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+      .form-error { min-height: 1.2em; color: #a33131; font-size: 0.82rem; }
+      .primary-btn { min-height: 48px; border: 0; border-radius: 12px; padding: 0 16px; background: var(--text); color: #fff; font-weight: 700; }
+      .secondary-btn { min-height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; background: #fff; color: var(--text); font-weight: 700; }
+      .review-text { width: 100%; min-height: 100px; margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; font: inherit; resize: vertical; }
 
       .lang-option.is-selected {
         background: var(--primary-soft);
@@ -320,7 +343,9 @@
       }
 
       @media (min-width: 600px) {
-        .container { max-width: 560px; }
+        .container { max-width: 760px; }
+        .profile-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .orders-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
   </head>
@@ -364,36 +389,57 @@
         </div>
 
         <div class="profile-list">
+          <a class="profile-option" href="#orders-section">
+            <span class="option-icon" aria-hidden="true">▤</span>
+            <span class="option-label" data-i18n="my-orders">My Orders</span>
+            <span class="chevron" aria-hidden="true">›</span>
+          </a>
+
+          <button class="profile-option" type="button" data-action="addresses">
+            <span class="option-icon" aria-hidden="true">⌂</span>
+            <span class="option-label" data-i18n="saved-address">Saved Address</span>
+            <span class="chevron" aria-hidden="true">›</span>
+          </button>
+
           <a class="profile-option" href="help.html">
-            <span class="option-icon">?</span>
+            <span class="option-icon" aria-hidden="true">?</span>
             <span class="option-label" data-i18n="help-center">Help Center</span>
-            <span class="chevron">›</span>
+            <span class="chevron" aria-hidden="true">›</span>
+          </a>
+
+          <a class="profile-option" href="https://wa.me/918287442290" target="_blank" rel="noopener noreferrer">
+            <span class="option-icon" aria-hidden="true">↗</span>
+            <span class="option-label" data-i18n="whatsapp-support">WhatsApp Support</span>
+            <span class="chevron" aria-hidden="true">›</span>
           </a>
 
           <button class="profile-option" type="button" data-action="language">
-            <span class="option-icon">A</span>
+            <span class="option-icon" aria-hidden="true">A</span>
             <span class="option-label" data-i18n="change-language">Change Language</span>
-            <span class="chevron">›</span>
+            <span class="chevron" aria-hidden="true">›</span>
           </button>
 
           <button class="profile-option" type="button" data-action="share">
-            <span class="option-icon">↗</span>
+            <span class="option-icon" aria-hidden="true">↗</span>
             <span class="option-label" data-i18n="share-product">Share Product</span>
-            <span class="chevron">›</span>
+            <span class="chevron" aria-hidden="true">›</span>
           </button>
 
           <button class="profile-option" type="button" data-action="rating">
-            <span class="option-icon">★</span>
+            <span class="option-icon" aria-hidden="true">★</span>
             <span class="option-label" data-i18n="rating">Rating</span>
-            <span class="chevron">›</span>
+            <span class="chevron" aria-hidden="true">›</span>
+          </button>
+
+          <button class="profile-option" type="button" data-action="logout">
+            <span class="option-icon" aria-hidden="true">↪</span>
+            <span class="option-label" data-i18n="logout">Logout</span>
+            <span class="chevron" aria-hidden="true">›</span>
           </button>
         </div>
 
         <div id="orders-section" class="orders-box">
-          <div class="profile-order">
-            <strong data-i18n="my-order">My Order</strong>
-            <small id="order-summary-text">No recent order found.</small>
-          </div>
+          <div class="profile-order" id="orders-empty"><strong data-i18n="my-orders">My Orders</strong><small>No orders found.</small></div>
         </div>
       </div>
     </main>
@@ -413,6 +459,34 @@
       </div>
     </div>
 
+    <div id="address-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="address-title">
+        <div class="modal-head">
+          <h3 id="address-title" data-i18n="saved-address">Saved Address</h3>
+          <button type="button" class="close-btn" data-close="address" aria-label="Close">×</button>
+        </div>
+        <div id="address-list" class="address-list"></div>
+        <form id="address-form" class="address-form">
+          <strong id="address-form-title">Add address</strong>
+          <label for="address-name">Full Name</label>
+          <input id="address-name" type="text" autocomplete="name" placeholder="Full Name" required />
+          <label for="address-mobile">Mobile Number</label>
+          <input id="address-mobile" type="tel" inputmode="tel" autocomplete="tel" placeholder="Indian mobile number" required />
+          <label for="address-complete">Complete Address</label>
+          <textarea id="address-complete" autocomplete="street-address" placeholder="Complete Address" required></textarea>
+          <label for="address-city">City</label>
+          <input id="address-city" type="text" autocomplete="address-level2" placeholder="City" required />
+          <label for="address-state">State</label>
+          <input id="address-state" type="text" autocomplete="address-level1" placeholder="State" required />
+          <label for="address-pin">PIN Code</label>
+          <input id="address-pin" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="6-digit PIN Code" required />
+          <div id="address-error" class="form-error" role="alert" aria-live="polite"></div>
+          <button type="submit" class="primary-btn" id="save-address">Save Address</button>
+          <button type="button" class="secondary-btn" id="cancel-address-edit" hidden>Cancel Edit</button>
+        </form>
+      </div>
+    </div>
+
     <div id="rating-modal" class="modal hidden" aria-hidden="true">
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rating-title">
         <div class="modal-head">
@@ -428,8 +502,9 @@
           <button type="button" class="star-btn" data-value="5" aria-label="5 stars">★</button>
         </div>
         <div class="rating-note" id="rating-note">Select a rating</div>
+        <textarea id="review-content" class="review-text" placeholder="Write a review (optional)"></textarea>
         <div style="margin-top:12px;">
-          <button type="button" id="submit-rating" class="primary-btn" style="width:100%; min-height:48px; border:none; border-radius:12px; background:#111; color:#fff; font-weight:700;">Submit Rating</button>
+          <button type="button" id="submit-rating" class="primary-btn" style="width:100%;">Submit Rating</button>
         </div>
       </div>
     </div>
@@ -457,10 +532,13 @@
           showToast.timeoutId = setTimeout(() => toast.classList.remove('show'), 1800);
         };
 
-        const getStoredRatings = () => {
+        const ADDRESS_KEY = 'sidraCobeAddresses';
+        let editingAddressIndex = null;
+
+        const readAddresses = () => {
           try {
-            const raw = localStorage.getItem('sidraCobeRatings');
-            return raw ? JSON.parse(raw) : [];
+            const addresses = JSON.parse(localStorage.getItem(ADDRESS_KEY) || '[]');
+            return Array.isArray(addresses) ? addresses : [];
           } catch (error) {
             return [];
           }
@@ -476,18 +554,137 @@
           }
         };
 
-        const renderOrderSummary = () => {
-          const summaryText = document.getElementById('order-summary-text');
+        const renderOrders = () => {
+          const section = document.getElementById('orders-section');
           const orders = readOrders();
+          section.innerHTML = '';
           if (!orders.length) {
-            summaryText.textContent = 'No recent order found.';
+            const empty = document.createElement('div');
+            empty.className = 'profile-order';
+            empty.innerHTML = '<strong>My Orders</strong><small>No orders found.</small>';
+            section.appendChild(empty);
             return;
           }
 
-          const latest = orders[0];
-          const name = latest.productName || latest.products || 'Product';
-          const total = latest.total || '₹0';
-          summaryText.textContent = `${name} • ${total}`;
+          orders.forEach((order) => {
+            const article = document.createElement('article');
+            article.className = 'profile-order';
+            const heading = document.createElement('strong');
+            heading.textContent = order.orderNumber || order.orderId || 'Order';
+            const details = document.createElement('small');
+            details.textContent = `${order.products || order.productName || 'Order details unavailable'} · ${order.total || '₹0'}`;
+            const status = document.createElement('small');
+            status.textContent = `${order.status || 'Order status unavailable'} · ${order.date || ''}`;
+            const actions = document.createElement('div');
+            actions.className = 'profile-order-actions';
+            const trackingLink = document.createElement('a');
+            trackingLink.href = `tracking.html?order=${encodeURIComponent(order.orderNumber || order.orderId || '')}`;
+            trackingLink.textContent = 'Track order';
+            actions.appendChild(trackingLink);
+            article.append(heading, details, status, actions);
+            section.appendChild(article);
+          });
+        };
+
+        const renderAddresses = () => {
+          const list = document.getElementById('address-list');
+          const addresses = readAddresses();
+          list.innerHTML = '';
+          if (!addresses.length) {
+            const empty = document.createElement('p');
+            empty.className = 'muted';
+            empty.textContent = 'No saved addresses.';
+            list.appendChild(empty);
+          }
+
+          addresses.forEach((address, index) => {
+            const entry = document.createElement('article');
+            entry.className = 'address-entry';
+            const name = document.createElement('strong');
+            name.textContent = address.fullName || 'Saved address';
+            const details = document.createElement('p');
+            details.textContent = [address.mobile, address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join(', ');
+            const actions = document.createElement('div');
+            actions.className = 'address-actions';
+            const edit = document.createElement('button');
+            edit.type = 'button';
+            edit.dataset.addressAction = 'edit';
+            edit.dataset.addressIndex = String(index);
+            edit.textContent = 'Edit';
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.dataset.addressAction = 'remove';
+            remove.dataset.addressIndex = String(index);
+            remove.textContent = 'Delete';
+            actions.append(edit, remove);
+            entry.append(name, details, actions);
+            list.appendChild(entry);
+          });
+        };
+
+        const resetAddressForm = () => {
+          editingAddressIndex = null;
+          document.getElementById('address-form').reset();
+          document.getElementById('address-form-title').textContent = 'Add address';
+          document.getElementById('save-address').textContent = 'Save Address';
+          document.getElementById('cancel-address-edit').hidden = true;
+          document.getElementById('address-error').textContent = '';
+        };
+
+        const editAddress = (index) => {
+          const address = readAddresses()[index];
+          if (!address) return;
+          editingAddressIndex = index;
+          document.getElementById('address-name').value = address.fullName || '';
+          document.getElementById('address-mobile').value = address.mobile || '';
+          document.getElementById('address-complete').value = address.house || '';
+          document.getElementById('address-city').value = address.city || '';
+          document.getElementById('address-state').value = address.state || '';
+          document.getElementById('address-pin').value = address.pin || '';
+          document.getElementById('address-form-title').textContent = 'Edit address';
+          document.getElementById('save-address').textContent = 'Update Address';
+          document.getElementById('cancel-address-edit').hidden = false;
+          document.getElementById('address-name').focus();
+        };
+
+        const saveAddress = (event) => {
+          event.preventDefault();
+          const mobile = document.getElementById('address-mobile').value.replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
+          const pin = document.getElementById('address-pin').value.trim();
+          const addressError = document.getElementById('address-error');
+          if (!/^[6-9]\d{9}$/.test(mobile)) {
+            addressError.textContent = 'Enter a valid Indian mobile number.';
+            return;
+          }
+          if (!/^[1-9]\d{5}$/.test(pin)) {
+            addressError.textContent = 'Enter a valid 6-digit Indian PIN code.';
+            return;
+          }
+
+          const address = {
+            fullName: document.getElementById('address-name').value.trim(),
+            mobile,
+            house: document.getElementById('address-complete').value.trim(),
+            street: '',
+            city: document.getElementById('address-city').value.trim(),
+            state: document.getElementById('address-state').value.trim(),
+            pin
+          };
+          if (!address.fullName || !address.mobile || !address.house || !address.city || !address.state || !address.pin) {
+            addressError.textContent = 'Complete every required address field.';
+            return;
+          }
+
+          const addresses = readAddresses();
+          if (editingAddressIndex === null) {
+            addresses.push(address);
+          } else {
+            addresses[editingAddressIndex] = address;
+          }
+          localStorage.setItem(ADDRESS_KEY, JSON.stringify(addresses));
+          resetAddressForm();
+          renderAddresses();
+          showToast('Address saved');
         };
 
         const updateLanguageSelection = () => {
@@ -501,11 +698,35 @@
           button.addEventListener('click', () => {
             const target = button.dataset.close;
             if (target === 'language') hideModal(languageModal);
+            if (target === 'address') hideModal(document.getElementById('address-modal'));
             if (target === 'rating') hideModal(ratingModal);
           });
         });
 
         document.querySelector('[data-action="language"]').addEventListener('click', () => openModal(languageModal));
+        document.querySelector('[data-action="addresses"]').addEventListener('click', () => {
+          resetAddressForm();
+          renderAddresses();
+          openModal(document.getElementById('address-modal'));
+        });
+
+        document.getElementById('address-form').addEventListener('submit', saveAddress);
+        document.getElementById('cancel-address-edit').addEventListener('click', resetAddressForm);
+        document.getElementById('address-list').addEventListener('click', (event) => {
+          const button = event.target.closest('[data-address-action]');
+          if (!button) return;
+          const index = Number(button.dataset.addressIndex);
+          if (button.dataset.addressAction === 'edit') {
+            editAddress(index);
+            return;
+          }
+          const addresses = readAddresses();
+          addresses.splice(index, 1);
+          localStorage.setItem(ADDRESS_KEY, JSON.stringify(addresses));
+          if (editingAddressIndex !== null) resetAddressForm();
+          renderAddresses();
+          showToast('Address deleted');
+        });
 
         document.querySelectorAll('.lang-option').forEach((button) => {
           button.addEventListener('click', () => {
@@ -523,24 +744,23 @@
         });
 
         document.querySelector('[data-action="share"]').addEventListener('click', async () => {
-          const storedProduct = (() => {
+          const storedProductId = (() => {
             try {
-              return JSON.parse(localStorage.getItem('sidraCobeSelectedProduct') || 'null');
+              return JSON.parse(localStorage.getItem('sidraCobeSelectedProduct') || 'null')?.id || '';
             } catch (error) {
-              return null;
+              return '';
             }
           })();
+          const product = (window.SIDRA_PRODUCTS || []).find((item) => String(item.id) === String(storedProductId));
+          if (!product) {
+            showToast('Open a product before sharing it.');
+            return;
+          }
 
-          const product = storedProduct || {
-            id: 'sidra-cobe-featured',
-            name: 'SIDRA COBE Product',
-            url: `${window.location.origin}/index.html`
-          };
-
-          const productUrl = product.url || `${window.location.origin}/pages/product.html?id=${encodeURIComponent(product.id)}`;
-          const shareText = product.name ? `Check out ${product.name} from SIDRA COBE.` : 'Check out this product from SIDRA COBE.';
+          const productUrl = new URL(`product.html?id=${encodeURIComponent(product.id)}`, window.location.href).href;
+          const shareText = `Check out ${product.name} from SIDRA COBE.`;
           const shareData = {
-            title: product.name || 'SIDRA COBE',
+            title: product.name,
             text: shareText,
             url: productUrl
           };
@@ -552,19 +772,31 @@
               return;
             }
           } catch (error) {
-            // Fall back to clipboard copy.
+            if (error.name === 'AbortError') {
+              showToast('Sharing cancelled');
+              return;
+            }
           }
 
+          let copied = false;
           try {
             if (navigator.clipboard) {
               await navigator.clipboard.writeText(productUrl);
-              showToast('Link copied');
-            } else {
-              showToast('Sharing unavailable');
+              copied = true;
             }
-          } catch (error) {
-            showToast('Link copied');
+          } catch (error) {}
+          if (!copied) {
+            const copyField = document.createElement('textarea');
+            copyField.value = productUrl;
+            copyField.style.position = 'fixed';
+            copyField.style.opacity = '0';
+            document.body.appendChild(copyField);
+            copyField.select();
+            copied = document.execCommand('copy');
+            copyField.remove();
           }
+          if (copied) showToast('Product link copied');
+          else window.prompt('Copy the product link', productUrl);
         });
 
         let selectedRating = 0;
@@ -581,27 +813,43 @@
           });
         });
 
-        document.getElementById('submit-rating').addEventListener('click', () => {
+        document.getElementById('submit-rating').addEventListener('click', async () => {
           if (!selectedRating) {
             ratingNote.textContent = 'Select a rating';
-            showToast('Select a rating');
             return;
           }
 
-          const previous = getStoredRatings();
-          previous.push({
-            value: selectedRating,
-            createdAt: new Date().toISOString()
-          });
-          localStorage.setItem('sidraCobeRatings', JSON.stringify(previous));
-          showToast('Thank you for your rating!');
-          hideModal(ratingModal);
-          selectedRating = 0;
-          starButtons.forEach((star) => star.classList.remove('is-active'));
-          ratingNote.textContent = 'Select a rating';
+          if (typeof window.sidraSubmitReview !== 'function') {
+            ratingNote.textContent = 'Review submission is not configured. Nothing was saved.';
+            return;
+          }
+
+          try {
+            const result = await window.sidraSubmitReview({
+              rating: selectedRating,
+              review: document.getElementById('review-content').value.trim()
+            });
+            if (!result || !result.ok) {
+              ratingNote.textContent = 'Review submission could not be confirmed. Nothing was saved.';
+              return;
+            }
+            showToast('Review submitted');
+            hideModal(ratingModal);
+            selectedRating = 0;
+            document.getElementById('review-content').value = '';
+            starButtons.forEach((star) => star.classList.remove('is-active'));
+            ratingNote.textContent = 'Select a rating';
+          } catch (error) {
+            ratingNote.textContent = 'Review submission could not be confirmed. Nothing was saved.';
+          }
         });
 
         document.querySelector('[data-action="rating"]').addEventListener('click', () => openModal(ratingModal));
+        document.querySelector('[data-action="logout"]').addEventListener('click', () => {
+          localStorage.removeItem('sidraCobeAuth');
+          localStorage.removeItem('sidraCobeDemoSession');
+          window.location.href = 'login.html';
+        });
 
         document.querySelectorAll('.account-button').forEach((button) => {
           button.addEventListener('click', () => { window.location.href = 'account.html'; });
@@ -623,7 +871,8 @@
           window.applySidraTranslation();
         }
         updateLanguageSelection();
-        renderOrderSummary();
+        renderOrders();
+        renderAddresses();
       })();
     </script>
   </body>
