@@ -116,7 +116,7 @@
           <div class="success-header">
             <div class="success-icon">✓</div>
             <div>
-              <h1>Order Placed Successfully</h1>
+              <h1 id="success-title">Order Placed Successfully</h1>
             </div>
           </div>
 
@@ -135,7 +135,8 @@
               <div class="detail-row"><span class="label">Total amount</span><strong id="total-amount">₹0</strong></div>
               <div class="detail-row"><span class="label">Delivery address</span><strong id="delivery-address">-</strong></div>
               <div class="detail-row"><span class="label">Payment method</span><strong id="payment-method">-</strong></div>
-              <div class="detail-row"><span class="label">Order status</span><strong id="order-status">Confirmed</strong></div>
+              <div class="detail-row"><span class="label">Payment status</span><strong id="payment-status">-</strong></div>
+              <div class="detail-row"><span class="label">Order status</span><strong id="order-status">Status unavailable</strong></div>
             </div>
 
             <div class="detail-box">
@@ -147,9 +148,9 @@
           </div>
 
           <div class="actions">
-            <a href="tracking.html" class="button button-primary">Track Order</a>
+            <a id="track-order-link" href="tracking.html" class="button button-primary">Track Order</a>
             <a href="../index.html" class="button button-secondary">Continue Shopping</a>
-            <a href="account.html" class="button button-secondary">View My Orders</a>
+            <a id="view-order-link" href="account.html#orders-section" class="button button-secondary">View My Order</a>
           </div>
         </div>
       </div>
@@ -177,33 +178,53 @@
           return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(safeNumber(value));
         }
 
+        const ORDER_STATUS_LABELS = {
+          ORDER_PLACED: "Order Placed",
+          CONFIRMED: "Confirmed",
+          PROCESSING: "Processing",
+          SHIPPED: "Shipped",
+          OUT_FOR_DELIVERY: "Out for Delivery",
+          DELIVERED: "Delivered"
+        };
+
         function renderOrder() {
           const order = readJSON("sidraCobeLastOrder", null)
             || (Array.isArray(readJSON("sidraCobeOrders", [])) ? readJSON("sidraCobeOrders", [])[0] : null);
 
           if (!order) {
-            document.getElementById("order-id").textContent = "SIDRA-0000";
+            document.getElementById("success-title").textContent = "Order details unavailable";
+            document.getElementById("order-id").textContent = "Unavailable";
+            document.getElementById("reference-id").textContent = "Unavailable";
+            document.getElementById("order-status").textContent = "Unavailable";
+            document.getElementById("delivery-address").textContent = "Delivery address unavailable";
+            document.getElementById("payment-method").textContent = "Payment method unavailable";
+            document.getElementById("payment-status").textContent = "Payment status unavailable";
             return;
           }
 
+          const orderId = order.orderNumber || order.orderId || "Unavailable";
           const productName = order.productName || order.products || "Product";
           const quantity = safeNumber(order.quantity) || 1;
           const address = order.address || {};
-          const addressText = [address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join(", ");
+          const addressText = [address.fullName, address.mobile, address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join(", ");
 
           document.getElementById("mini-image").className = "mini-image " + (order.productImage || "media-one");
           document.getElementById("product-name").textContent = productName;
           document.getElementById("product-qty").textContent = "Qty: " + quantity;
-          document.getElementById("order-id").textContent = order.orderNumber || "SIDRA-0000";
-          document.getElementById("reference-id").textContent = order.orderNumber || "SIDRA-0000";
-          document.getElementById("order-date").textContent = order.date || "Today";
+          document.getElementById("order-id").textContent = orderId;
+          document.getElementById("reference-id").textContent = orderId;
+          document.getElementById("order-date").textContent = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "Date unavailable");
           document.getElementById("total-amount").textContent = order.total || formatCurrency(order.totalValue || 0);
           document.getElementById("delivery-address").textContent = addressText || "Address not provided";
           document.getElementById("payment-method").textContent = order.paymentMethod || order.paymentStatus || "Cash on Delivery";
-          document.getElementById("order-status").textContent = order.status || "Confirmed";
+          document.getElementById("payment-status").textContent = order.paymentStatus || "Payment status unavailable";
+          const legacyStatus = order.status === "Order Confirmed" ? "Confirmed" : order.status;
+          document.getElementById("order-status").textContent = ORDER_STATUS_LABELS[order.statusCode] || Object.values(ORDER_STATUS_LABELS).find((label) => label === legacyStatus) || "Status unavailable";
           document.getElementById("summary-product").textContent = productName;
           document.getElementById("summary-qty").textContent = String(quantity);
           document.getElementById("summary-total").textContent = order.total || formatCurrency(order.totalValue || 0);
+          document.getElementById("track-order-link").href = `tracking.html?order=${encodeURIComponent(orderId)}`;
+          document.getElementById("view-order-link").href = `order-details.html?order=${encodeURIComponent(orderId)}`;
         }
 
         renderOrder();

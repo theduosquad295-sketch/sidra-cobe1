@@ -849,15 +849,32 @@
           return valid;
         }
 
-        function buildOrder(state) {
+        function generateOrderId(orders, createdAt) {
+          const year = new Date(createdAt).getFullYear();
+          const prefix = `SC-${year}-`;
+          const existingIds = new Set(orders.map((order) => String(order.orderNumber || order.orderId || "")));
+          let sequence = orders.reduce((max, order) => {
+            const match = String(order.orderNumber || order.orderId || "").match(/^SC-(\d{4})-(\d{6})$/);
+            return match && Number(match[1]) === year ? Math.max(max, Number(match[2])) : max;
+          }, 0) + 1;
+          let orderId = `${prefix}${String(sequence).padStart(6, "0")}`;
+          while (existingIds.has(orderId)) {
+            sequence += 1;
+            orderId = `${prefix}${String(sequence).padStart(6, "0")}`;
+          }
+          return orderId;
+        }
+
+        function buildOrder(state, existingOrders) {
           const items = state.items;
           const firstItem = items[0] || {};
           const quantity = items.reduce((sum, item) => sum + safeNumber(item.quantity), 0);
           const totals = calculateTotals(items);
           const total = totals.total;
           const payment = "Cash on Delivery";
-          const orderNumber = "SIDRA-" + Date.now().toString().slice(-6);
-          const orderDate = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+          const createdAt = new Date().toISOString();
+          const orderNumber = generateOrderId(existingOrders, createdAt);
+          const orderDate = new Date(createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
           const mobileDigits = document.getElementById("mobile").value.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
           const customer = {
             fullName: document.getElementById("full-name").value.trim(),
@@ -877,7 +894,7 @@
             orderNumber,
             orderId: orderNumber,
             date: orderDate,
-            createdAt: new Date().toISOString(),
+            createdAt,
             products: items.map((item) => `${item.name || "Product"} (Qty ${safeNumber(item.quantity)})`).join(", "),
             productName: firstItem.name || "Product",
             productImage: firstItem.imageClass || "media-one",
@@ -905,12 +922,14 @@
             paymentStatus: "Pending",
             paymentLabel: "Cash on Delivery / Pending",
             paymentMethod: payment,
+            statusCode: "ORDER_PLACED",
             status: "Order Placed",
+            statusHistory: [{ statusCode: "ORDER_PLACED", status: "Order Placed", changedAt: createdAt }],
             statusClass: "",
             address,
             itemId: String(firstItem.id || ""),
             itemIds: items.map((item) => String(item.id || "")),
-            totalValue: total,
+            totalValue: total
           };
         }
 
@@ -923,7 +942,7 @@
             id: "admin-notification-" + Date.now(),
             type: "new_order",
             title: "New Order Received",
-            orderId: order?.orderNumber || "SIDRA-0000",
+            orderId: order?.orderNumber || order?.orderId || "",
             customerName,
             productName,
             quantity,
@@ -932,7 +951,7 @@
             createdAt: orderDateTime,
             status: "queued",
             recipient: "admin",
-            message: "New Order Received - " + (order?.orderNumber || "SIDRA-0000") + " for " + productName + " by " + customerName
+            message: "New Order Received - " + (order?.orderNumber || order?.orderId || "") + " for " + productName + " by " + customerName
           };
 
           const notifications = readJSON(ADMIN_NOTIFICATION_KEY, []);
@@ -965,8 +984,8 @@
           if (!validate()) return;
 
           const checkoutState = getCheckoutState();
-          const order = buildOrder(checkoutState);
           const orders = readJSON(ORDER_KEY, []);
+          const order = buildOrder(checkoutState, Array.isArray(orders) ? orders : []);
           const nextOrders = Array.isArray(orders) ? [order, ...orders] : [order];
           saveJSON(ORDER_KEY, nextOrders);
 

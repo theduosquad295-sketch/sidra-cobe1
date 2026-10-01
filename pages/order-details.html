@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SIDRA COBE order details." />
+    <title>SIDRA COBE | Order Details</title>
+    <style>
+      :root {
+        --background: #f7f5f2;
+        --surface: #ffffff;
+        --line: #eae7e1;
+        --text: #171717;
+        --muted: #666666;
+        --accent: #246b56;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--background); color: var(--text); font: 16px/1.55 "Segoe UI", Tahoma, sans-serif; overflow-x: hidden; }
+      a { color: inherit; text-decoration: none; }
+      button { font: inherit; cursor: pointer; }
+      .container { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 16px; }
+      .site-header { position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); }
+      .header-row { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .back-link, .copy-button, .action-link { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 10px; padding: 0 14px; background: var(--surface); font-weight: 700; }
+      h1 { margin: 0; font-size: 1.3rem; }
+      main { padding: 20px 0 44px; }
+      .order-layout { display: grid; gap: 14px; }
+      .panel { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+      .panel h2 { margin: 0 0 12px; font-size: 1rem; }
+      .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .detail-label { display: block; color: var(--muted); font-size: .78rem; }
+      .detail-value { display: block; overflow-wrap: anywhere; font-weight: 700; }
+      .order-id-row { display: flex; align-items: center; gap: 8px; }
+      .copy-button { min-height: 36px; padding: 0 10px; font-size: .82rem; }
+      .product-list { display: grid; gap: 12px; }
+      .product-line { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 12px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+      .product-line:last-child { padding-bottom: 0; border-bottom: 0; }
+      .product-image { width: 68px; height: 82px; border-radius: 9px; object-fit: cover; }
+      .product-name { margin: 0; font-weight: 700; }
+      .product-meta { color: var(--muted); font-size: .86rem; overflow-wrap: anywhere; }
+      .price-rows { display: grid; gap: 8px; }
+      .price-row { display: flex; justify-content: space-between; gap: 12px; }
+      .price-row.total { margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 1.08rem; font-weight: 800; }
+      .address-text { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+      .tracking-note { margin: 0; color: var(--muted); }
+      .history-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+      .history-list li { display: grid; gap: 2px; padding-left: 12px; border-left: 2px solid var(--accent); }
+      .history-date { color: var(--muted); font-size: .82rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      .action-link.primary { background: var(--text); border-color: var(--text); color: #fff; }
+      .empty-state { padding: 22px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+      .empty-state p { color: var(--muted); }
+      @media (min-width: 700px) {
+        .order-layout { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); align-items: start; }
+        .order-info, .products-panel, .history-panel, .actions { grid-column: 1 / -1; }
+        .price-panel, .address-panel, .payment-panel, .tracking-panel { grid-column: span 1; }
+      }
+      @media (max-width: 390px) {
+        .detail-grid { grid-template-columns: 1fr; }
+        .header-row { align-items: flex-start; flex-direction: column; padding: 10px 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <a class="back-link" href="account.html#orders-section">← My Orders</a>
+        <h1>Order Details</h1>
+      </div>
+    </header>
+    <main class="container">
+      <div id="order-not-found" class="empty-state" hidden>
+        <h2>Order not found</h2>
+        <p>This order is not available in the order history stored on this device.</p>
+        <a class="action-link primary" href="account.html#orders-section">Back to My Orders</a>
+      </div>
+      <div id="order-content" class="order-layout" hidden>
+        <section class="panel order-info">
+          <h2>Order Information</h2>
+          <div class="detail-grid">
+            <div><span class="detail-label">Order ID</span><div class="order-id-row"><strong id="order-id" class="detail-value"></strong><button id="copy-order-id" class="copy-button" type="button">Copy</button></div></div>
+            <div><span class="detail-label">Order Date</span><strong id="order-date" class="detail-value"></strong></div>
+            <div><span class="detail-label">Current Status</span><strong id="order-status" class="detail-value"></strong></div>
+          </div>
+        </section>
+        <section class="panel products-panel">
+          <h2>Products</h2>
+          <div id="order-products" class="product-list"></div>
+        </section>
+        <section class="panel price-panel">
+          <h2>Price Summary</h2>
+          <div class="price-rows">
+            <div class="price-row"><span>Subtotal</span><strong id="order-subtotal"></strong></div>
+            <div class="price-row"><span>Shipping</span><strong id="order-shipping"></strong></div>
+            <div class="price-row"><span>Discount</span><strong id="order-discount"></strong></div>
+            <div class="price-row total"><span>Total</span><strong id="order-total"></strong></div>
+          </div>
+        </section>
+        <section class="panel address-panel">
+          <h2>Delivery Address</h2>
+          <p id="order-address" class="address-text"></p>
+        </section>
+        <section class="panel payment-panel">
+          <h2>Payment</h2>
+          <div class="detail-grid">
+            <div><span class="detail-label">Payment Method</span><strong id="payment-method" class="detail-value"></strong></div>
+            <div><span class="detail-label">Payment Status</span><strong id="payment-status" class="detail-value"></strong></div>
+          </div>
+        </section>
+        <section class="panel tracking-panel">
+          <h2>Tracking</h2>
+          <div id="tracking-information"></div>
+        </section>
+        <section class="panel history-panel">
+          <h2>Status History</h2>
+          <ol id="status-history" class="history-list"></ol>
+          <p id="history-unavailable" class="tracking-note" hidden>Status history is not available for this order.</p>
+        </section>
+        <div class="actions">
+          <a id="track-order-link" class="action-link primary" href="tracking.html">Track Order</a>
+          <a class="action-link" href="../index.html">Continue Shopping</a>
+        </div>
+      </div>
+    </main>
+    <script src="../js/main.js"></script>
+    <script>
+      (function () {
+        const statusLabels = {
+          ORDER_PLACED: "Order Placed",
+          CONFIRMED: "Confirmed",
+          PROCESSING: "Processing",
+          SHIPPED: "Shipped",
+          OUT_FOR_DELIVERY: "Out for Delivery",
+          DELIVERED: "Delivered"
+        };
+        const readOrders = () => {
+          try {
+            const orders = JSON.parse(localStorage.getItem("sidraCobeOrders") || "[]");
+            return Array.isArray(orders) ? orders : [];
+          } catch (error) { return []; }
+        };
+        const formatCurrency = (value) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(Number(value) || 0);
+        const orderId = new URLSearchParams(window.location.search).get("order") || "";
+        const order = readOrders().find((entry) => String(entry.orderNumber || entry.orderId || "") === orderId);
+        const orderContent = document.getElementById("order-content");
+        const notFound = document.getElementById("order-not-found");
+
+        if (!order) {
+          notFound.hidden = false;
+          return;
+        }
+
+        orderContent.hidden = false;
+        const legacyStatus = order.status === "Order Confirmed" ? "Confirmed" : order.status;
+        const status = statusLabels[order.statusCode] || Object.values(statusLabels).find((label) => label === legacyStatus) || "Status unavailable";
+        document.getElementById("order-id").textContent = order.orderNumber || order.orderId;
+        document.getElementById("order-date").textContent = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleString() : "Date unavailable");
+        document.getElementById("order-status").textContent = status;
+
+        const items = Array.isArray(order.items) && order.items.length ? order.items : [{
+          id: order.itemId || "",
+          name: order.productName || order.products || "Product details unavailable",
+          quantity: Number(order.quantity) || 1,
+          imageClass: order.productImage || "media-one",
+          price: null,
+          size: "",
+          variant: ""
+        }];
+        const productList = document.getElementById("order-products");
+        items.forEach((item) => {
+          const line = document.createElement("article");
+          line.className = "product-line";
+          const image = document.createElement("img");
+          image.className = "product-image";
+          image.alt = item.name || "Ordered product";
+          image.src = window.getSidraImagePath ? window.getSidraImagePath(item.imageClass || "media-one") : "../images/products/shirt1.jpg";
+          const details = document.createElement("div");
+          const name = document.createElement("p");
+          name.className = "product-name";
+          name.textContent = item.name || "Product";
+          const options = [item.size && `Size: ${item.size}`, item.variant && `Variant: ${item.variant}`].filter(Boolean).join(" · ");
+          const meta = document.createElement("div");
+          meta.className = "product-meta";
+          meta.textContent = [`Qty: ${Number(item.quantity) || 1}`, options, item.price === null || item.price === undefined ? "Price unavailable" : formatCurrency(item.price)].filter(Boolean).join(" · ");
+          details.append(name, meta);
+          line.append(image, details);
+          productList.appendChild(line);
+        });
+
+        document.getElementById("order-subtotal").textContent = order.subtotal || (Number.isFinite(Number(order.subtotalValue)) ? formatCurrency(order.subtotalValue) : "Not available");
+        document.getElementById("order-shipping").textContent = order.shipping || (Number.isFinite(Number(order.shippingCharge)) ? formatCurrency(order.shippingCharge) : "Not available");
+        document.getElementById("order-discount").textContent = order.discount || (Number.isFinite(Number(order.discountValue)) ? `-${formatCurrency(order.discountValue)}` : "Not available");
+        document.getElementById("order-total").textContent = order.total || (Number.isFinite(Number(order.finalTotal ?? order.totalValue)) ? formatCurrency(order.finalTotal ?? order.totalValue) : "Not available");
+
+        const address = order.address || {};
+        document.getElementById("order-address").textContent = [address.fullName, address.mobile, address.house, address.street, address.city, address.state, address.pin].filter(Boolean).join("\n") || "Delivery address unavailable";
+        document.getElementById("payment-method").textContent = order.paymentMethod || "Not available";
+        document.getElementById("payment-status").textContent = order.paymentStatus || "Not available";
+
+        const tracking = order.tracking || order.trackingInfo || null;
+        const trackingContainer = document.getElementById("tracking-information");
+        if (!tracking || !Object.values(tracking).some(Boolean)) {
+          const note = document.createElement("p");
+          note.className = "tracking-note";
+          note.textContent = "Tracking information will be available after shipment.";
+          trackingContainer.appendChild(note);
+        } else {
+          const fields = [
+            ["Tracking ID", tracking.trackingId || tracking.id],
+            ["Courier / Delivery Partner", tracking.courier || tracking.deliveryPartner],
+            ["Shipment Status", tracking.shipmentStatus],
+            ["Estimated Delivery", tracking.estimatedDelivery]
+          ].filter(([, value]) => value);
+          fields.forEach(([label, value]) => {
+            const row = document.createElement("p");
+            row.className = "product-meta";
+            row.textContent = `${label}: ${value}`;
+            trackingContainer.appendChild(row);
+          });
+          if (tracking.trackingUrl) {
+            try {
+              const url = new URL(tracking.trackingUrl, window.location.href);
+              if (url.protocol === "https:" || url.protocol === "http:") {
+                const link = document.createElement("a");
+                link.className = "action-link";
+                link.href = url.href;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = "Open carrier tracking";
+                trackingContainer.appendChild(link);
+              }
+            } catch (error) {}
+          }
+        }
+
+        const history = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+        const historyList = document.getElementById("status-history");
+        history.forEach((entry) => {
+          const item = document.createElement("li");
+          const label = document.createElement("strong");
+          label.textContent = statusLabels[entry.statusCode] || entry.status || "Status update";
+          const date = document.createElement("span");
+          date.className = "history-date";
+          date.textContent = entry.changedAt ? new Date(entry.changedAt).toLocaleString() : "Time unavailable";
+          item.append(label, date);
+          historyList.appendChild(item);
+        });
+        document.getElementById("history-unavailable").hidden = history.length > 0;
+
+        document.getElementById("track-order-link").href = `tracking.html?order=${encodeURIComponent(order.orderNumber || order.orderId)}`;
+        document.getElementById("copy-order-id").addEventListener("click", async () => {
+          const value = order.orderNumber || order.orderId;
+          try {
+            await navigator.clipboard.writeText(value);
+            document.getElementById("copy-order-id").textContent = "Copied";
+          } catch (error) {
+            window.prompt("Copy order ID", value);
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

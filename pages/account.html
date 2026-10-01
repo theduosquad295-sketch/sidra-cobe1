@@ -167,6 +167,10 @@
         gap: 6px;
       }
 
+      .order-product-image { width: 72px; height: 84px; border-radius: 10px; object-fit: cover; }
+      .order-card-product { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: center; gap: 12px; }
+      .order-card-status { font-weight: 700; }
+
       .profile-order strong {
         font-size: 0.96rem;
       }
@@ -177,7 +181,8 @@
 
       .profile-order-actions { display: flex; gap: 12px; flex-wrap: wrap; }
       .profile-order-actions a,
-      .address-actions button { min-height: 40px; display: inline-flex; align-items: center; color: var(--text); font-weight: 700; }
+      .address-actions button { min-height: 44px; display: inline-flex; align-items: center; color: var(--text); font-weight: 700; }
+      .profile-order-actions a { min-height: 44px; display: inline-flex; align-items: center; color: var(--text); font-weight: 700; }
 
       .profile-option {
         width: 100%;
@@ -567,21 +572,47 @@
           }
 
           orders.forEach((order) => {
+            const items = Array.isArray(order.items) ? order.items : [];
+            const firstItem = items[0] || {};
+            const imageClass = firstItem.imageClass || order.productImage || "media-one";
+            const imagePath = window.getSidraImagePath ? window.getSidraImagePath(imageClass) : `../images/products/${imageClass.replace("media-", "")}.jpg`;
+            const statusLabels = { ORDER_PLACED: "Order Placed", CONFIRMED: "Confirmed", PROCESSING: "Processing", SHIPPED: "Shipped", OUT_FOR_DELIVERY: "Out for Delivery", DELIVERED: "Delivered" };
+            const legacyStatus = order.status === "Order Confirmed" ? "Confirmed" : order.status;
+            const status = statusLabels[order.statusCode] || Object.values(statusLabels).find((label) => label === legacyStatus) || "Status unavailable";
             const article = document.createElement('article');
             article.className = 'profile-order';
             const heading = document.createElement('strong');
             heading.textContent = order.orderNumber || order.orderId || 'Order';
+            const date = document.createElement('small');
+            date.textContent = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Date unavailable');
+            const product = document.createElement('div');
+            product.className = 'order-card-product';
+            const image = document.createElement('img');
+            image.className = 'order-product-image';
+            image.src = imagePath;
+            image.alt = firstItem.name || order.productName || 'Ordered product';
+            const productDetails = document.createElement('div');
             const details = document.createElement('small');
-            details.textContent = `${order.products || order.productName || 'Order details unavailable'} · ${order.total || '₹0'}`;
-            const status = document.createElement('small');
-            status.textContent = `${order.status || 'Order status unavailable'} · ${order.date || ''}`;
+            details.textContent = items.length
+              ? items.map((item) => `${item.name} × ${item.quantity}`).join(', ')
+              : `${order.productName || order.products || 'Order details unavailable'} · Qty ${order.quantity || 1}`;
+            const total = document.createElement('strong');
+            total.textContent = order.total || `₹${Number(order.totalValue || 0).toLocaleString('en-IN')}`;
+            productDetails.append(details, total);
+            product.append(image, productDetails);
+            const statusLine = document.createElement('small');
+            statusLine.className = 'order-card-status';
+            statusLine.textContent = status;
             const actions = document.createElement('div');
             actions.className = 'profile-order-actions';
+            const detailsLink = document.createElement('a');
+            detailsLink.href = `order-details.html?order=${encodeURIComponent(order.orderNumber || order.orderId || '')}`;
+            detailsLink.textContent = 'View Details';
             const trackingLink = document.createElement('a');
             trackingLink.href = `tracking.html?order=${encodeURIComponent(order.orderNumber || order.orderId || '')}`;
             trackingLink.textContent = 'Track order';
-            actions.appendChild(trackingLink);
-            article.append(heading, details, status, actions);
+            actions.append(detailsLink, trackingLink);
+            article.append(heading, date, product, statusLine, actions);
             section.appendChild(article);
           });
         };

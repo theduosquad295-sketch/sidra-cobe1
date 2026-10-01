@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>SIDRA COBE | Manage Orders</title>
+		<style>
+			:root { --background: #f7f5f2; --surface: #fff; --line: #e7e3dc; --text: #171717; --muted: #666; --accent: #246b56; }
+			* { box-sizing: border-box; }
+			body { margin: 0; background: var(--background); color: var(--text); font: 16px/1.5 "Segoe UI", Tahoma, sans-serif; }
+			.container { width: 100%; max-width: 1080px; margin: 0 auto; padding: 20px 16px 48px; }
+			header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+			h1 { margin: 0; font-size: 1.4rem; }
+			a { color: inherit; text-decoration: none; }
+			.back-link, .order-link { min-height: 44px; display: inline-flex; align-items: center; font-weight: 700; }
+			.order-list { display: grid; gap: 12px; }
+			.order-card { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+			.order-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+			.order-meta { color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+			.status-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+			label { display: grid; gap: 5px; color: var(--muted); font-size: .8rem; font-weight: 700; }
+			select, button { min-height: 44px; border: 1px solid var(--line); border-radius: 9px; padding: 0 12px; background: var(--surface); color: var(--text); font: inherit; }
+			button { background: var(--text); color: #fff; font-weight: 700; cursor: pointer; }
+			button:disabled { opacity: .5; cursor: not-allowed; }
+			.feedback { min-height: 1.4em; color: var(--accent); font-size: .86rem; }
+			.empty { padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
+			@media (min-width: 720px) { .order-card { grid-template-columns: minmax(0, 1fr) minmax(300px, .7fr); align-items: center; } }
+		</style>
+	</head>
+	<body>
+		<main class="container">
+			<header>
+				<a class="back-link" href="index.html">← Admin</a>
+				<h1>Manage Orders</h1>
+			</header>
+			<p class="order-meta">Order status is stored with this browser's existing order records.</p>
+			<div id="order-list" class="order-list"></div>
+			<p id="empty-orders" class="empty" hidden>No orders are stored on this device.</p>
+		</main>
+		<script>
+			(function () {
+				const ORDER_KEY = "sidraCobeOrders";
+				const ORDER_STATUSES = [
+					{ code: "ORDER_PLACED", label: "Order Placed" },
+					{ code: "CONFIRMED", label: "Confirmed" },
+					{ code: "PROCESSING", label: "Processing" },
+					{ code: "SHIPPED", label: "Shipped" },
+					{ code: "OUT_FOR_DELIVERY", label: "Out for Delivery" },
+					{ code: "DELIVERED", label: "Delivered" }
+				];
+
+				function readOrders() {
+					try {
+						const orders = JSON.parse(localStorage.getItem(ORDER_KEY) || "[]");
+						return Array.isArray(orders) ? orders : [];
+					} catch (error) { return []; }
+				}
+
+				function saveOrders(orders) {
+					localStorage.setItem(ORDER_KEY, JSON.stringify(orders));
+				}
+
+				function currentStatusCode(order) {
+					if (ORDER_STATUSES.some((status) => status.code === order.statusCode)) return order.statusCode;
+					const legacyLabel = order.status === "Order Confirmed" ? "Confirmed" : order.status;
+					  return ORDER_STATUSES.find((status) => status.label === legacyLabel)?.code || "";
+				}
+
+				function renderOrders() {
+					const orders = readOrders();
+					const list = document.getElementById("order-list");
+					const empty = document.getElementById("empty-orders");
+					list.replaceChildren();
+					empty.hidden = orders.length > 0;
+
+					orders.forEach((order) => {
+						const card = document.createElement("article");
+						card.className = "order-card";
+						const info = document.createElement("div");
+						const heading = document.createElement("div");
+						heading.className = "order-heading";
+						const id = document.createElement("strong");
+						id.textContent = order.orderNumber || order.orderId || "Order ID unavailable";
+						const statusText = document.createElement("strong");
+						statusText.textContent = ORDER_STATUSES.find((status) => status.code === currentStatusCode(order))?.label || "Status unavailable";
+						heading.append(id, statusText);
+						const product = document.createElement("p");
+						product.className = "order-meta";
+						product.textContent = order.products || order.productName || "Product details unavailable";
+						const date = document.createElement("p");
+						date.className = "order-meta";
+						date.textContent = order.date || "Order date unavailable";
+						const total = document.createElement("p");
+						total.className = "order-meta";
+						total.textContent = order.total || "Order total unavailable";
+						const detailsLink = document.createElement("a");
+						detailsLink.className = "order-link";
+						detailsLink.href = `../pages/order-details.html?order=${encodeURIComponent(order.orderNumber || order.orderId || "")}`;
+						detailsLink.textContent = "View order details";
+						info.append(heading, product, date, total, detailsLink);
+
+						const form = document.createElement("form");
+						form.className = "status-form";
+						const label = document.createElement("label");
+						label.textContent = "Update order status";
+						const select = document.createElement("select");
+						select.setAttribute("aria-label", `Status for ${order.orderNumber || order.orderId || "order"}`);
+						const placeholder = document.createElement("option");
+						placeholder.value = "";
+						placeholder.textContent = "Select status";
+						placeholder.disabled = true;
+						select.appendChild(placeholder);
+						ORDER_STATUSES.forEach((status) => {
+							const option = document.createElement("option");
+							option.value = status.code;
+							option.textContent = status.label;
+							select.appendChild(option);
+						});
+						select.value = currentStatusCode(order) || "";
+						label.appendChild(select);
+						const saveButton = document.createElement("button");
+						saveButton.type = "submit";
+						saveButton.textContent = "Save Status";
+						const feedback = document.createElement("span");
+						feedback.className = "feedback";
+						feedback.setAttribute("aria-live", "polite");
+						form.append(label, saveButton, feedback);
+						form.addEventListener("submit", (event) => {
+							event.preventDefault();
+							const nextStatus = ORDER_STATUSES.find((status) => status.code === select.value);
+							if (!nextStatus) return;
+							const storedOrders = readOrders();
+							const storedOrder = storedOrders.find((entry) => String(entry.orderNumber || entry.orderId) === String(order.orderNumber || order.orderId));
+							if (!storedOrder) {
+								feedback.textContent = "Order is no longer available.";
+								return;
+							}
+							const previousStatusCode = currentStatusCode(storedOrder);
+							if (previousStatusCode !== nextStatus.code) {
+								storedOrder.statusCode = nextStatus.code;
+								storedOrder.status = nextStatus.label;
+								if (!Array.isArray(storedOrder.statusHistory)) storedOrder.statusHistory = [];
+								storedOrder.statusHistory.push({
+									statusCode: nextStatus.code,
+									status: nextStatus.label,
+									changedAt: new Date().toISOString()
+								});
+								saveOrders(storedOrders);
+								statusText.textContent = nextStatus.label;
+							}
+							feedback.textContent = previousStatusCode === nextStatus.code ? "Status unchanged." : "Status updated.";
+						});
+						card.append(info, form);
+						list.appendChild(card);
+					});
+				}
+
+				renderOrders();
+				window.addEventListener("storage", (event) => {
+					if (event.key === ORDER_KEY) renderOrders();
+				});
+			})();
+		</script>
+	</body>
+</html>

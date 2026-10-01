@@ -203,6 +203,17 @@
         background: #dfe7f3;
         border-color: rgba(100,117,138,0.12);
       }
+      .timeline-item.completed .timeline-bullet { background: var(--success); border-color: rgba(26,165,106,0.16); }
+      .timeline-item.completed .timeline-bullet::after { content: "✓"; display: block; color: #fff; font-size: 0.68rem; line-height: 12px; text-align: center; }
+      .timeline-item.active .timeline-bullet { background: var(--primary); border-color: rgba(13,110,253,0.24); box-shadow: 0 0 0 4px rgba(13,110,253,0.08); }
+      .timeline-item.pending .timeline-bullet { background: #dfe7f3; border-color: rgba(100,117,138,0.12); }
+      .tracking-extra { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+      .tracking-extra h2 { margin: 0 0 10px; font-size: 1rem; }
+      .tracking-extra p { margin: 4px 0; overflow-wrap: anywhere; }
+      .tracking-history { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+      .tracking-history li { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+      .tracking-history time { color: var(--muted); }
+      .tracking-link { display: inline-flex; min-height: 44px; align-items: center; color: var(--primary); font-weight: 700; }
       .timeline-item h3,
       .timeline-item p {
         margin: 0;
@@ -303,14 +314,23 @@
         </div>
 
         <p class="eyebrow">Tracking</p>
-        <h1 id="tracking-title">Order SIDRA-2401</h1>
+        <h1 id="tracking-title">Order Tracking</h1>
 
         <div class="status-row">
-          <span class="status-pill" id="tracking-status">Order Confirmed</span>
+          <span class="status-pill" id="tracking-status">Status unavailable</span>
           <span id="tracking-date">Loading order status...</span>
         </div>
 
         <div class="timeline" id="tracking-timeline"></div>
+        <section class="tracking-extra" aria-labelledby="tracking-info-heading">
+          <h2 id="tracking-info-heading">Shipment Tracking</h2>
+          <div id="tracking-information"></div>
+        </section>
+        <section class="tracking-extra" aria-labelledby="status-history-heading">
+          <h2 id="status-history-heading">Status History</h2>
+          <ol id="tracking-history" class="tracking-history"></ol>
+          <p id="history-unavailable">Status history is not available for this order.</p>
+        </section>
 
         <div class="meta-grid">
           <div class="meta-box">
@@ -353,12 +373,12 @@
         const WISHLIST_KEY = "sidraCobeWishlist";
         const ORDER_KEY = "sidraCobeOrders";
         const steps = [
-          "Order Placed",
-          "Order Confirmed",
-          "Processing",
-          "Shipped",
-          "Out for Delivery",
-          "Delivered"
+          { code: "ORDER_PLACED", label: "Order Placed" },
+          { code: "CONFIRMED", label: "Confirmed" },
+          { code: "PROCESSING", label: "Processing" },
+          { code: "SHIPPED", label: "Shipped" },
+          { code: "OUT_FOR_DELIVERY", label: "Out for Delivery" },
+          { code: "DELIVERED", label: "Delivered" }
         ];
 
         const safeNumber = (value) => {
@@ -418,55 +438,43 @@
           return orders[0];
         };
 
-        const normalizeStatus = (status) => {
-          const value = String(status || "").trim();
-          if (!value) return "Order Confirmed";
-          const lower = value.toLowerCase();
-          if (lower.includes("cancel")) return "Order Cancelled";
-          if (lower.includes("confirmed")) return "Order Confirmed";
-          if (lower.includes("processing")) return "Processing";
-          if (lower.includes("shipped")) return "Shipped";
-          if (lower.includes("delivery")) return "Out for Delivery";
-          if (lower.includes("deliver")) return "Delivered";
-          return value;
+        const getOrderStatus = (order) => {
+          if (steps.some((step) => step.code === order?.statusCode)) return order.statusCode;
+          const storedStatus = String(order?.status || "").trim();
+          if (storedStatus === "Order Cancelled") return "CANCELLED";
+          const legacyStatus = storedStatus === "Order Confirmed" ? "Confirmed" : storedStatus;
+          const match = steps.find((step) => step.label === legacyStatus);
+          return match ? match.code : null;
         };
 
-        const buildTimeline = (status) => {
+        const buildTimeline = (statusCode) => {
           const timeline = document.getElementById("tracking-timeline");
           if (!timeline) return;
 
-          const cancelled = status === "Order Cancelled";
-          const currentIndex = cancelled ? -1 : steps.findIndex((step) => step === status);
+          if (statusCode === "CANCELLED") {
+            timeline.innerHTML = '<div class="timeline-item active"><span class="timeline-bullet"></span><div><h3>Order Cancelled</h3><p>Current status</p></div></div>';
+            return;
+          }
+
+          const currentIndex = steps.findIndex((step) => step.code === statusCode);
 
           timeline.innerHTML = steps.map((step, index) => {
-            const isActive = !cancelled && index <= (currentIndex >= 0 ? currentIndex : 0);
-            const className = `timeline-item${isActive ? "" : " inactive"}`;
+            const state = index < currentIndex ? "completed" : index === currentIndex ? "active" : "pending";
             return `
-              <div class="${className}">
+              <div class="timeline-item ${state}" ${state === "active" ? 'aria-current="step"' : ""}>
                 <span class="timeline-bullet"></span>
                 <div>
-                  <h3>${step}</h3>
-                  <p>${cancelled ? "Cancelled order" : step === status ? "Current status" : "Progressing"}</p>
+                  <h3>${step.label}</h3>
+                  <p>${state === "active" ? "Current status" : state === "completed" ? "Completed" : "Pending"}</p>
                 </div>
               </div>
             `;
           }).join("");
-
-          if (cancelled) {
-            timeline.innerHTML = `
-              <div class="timeline-item">
-                <span class="timeline-bullet"></span>
-                <div>
-                  <h3>Order Cancelled</h3>
-                  <p>This order was cancelled and no delivery timeline applies.</p>
-                </div>
-              </div>
-            `;
-          }
         };
 
         const order = getCurrentOrder();
-        const status = order ? normalizeStatus(order.status || order.paymentStatus || order.paymentMethod || "Order Confirmed") : "Order Confirmed";
+        const statusCode = order ? getOrderStatus(order) : null;
+        const status = statusCode === "CANCELLED" ? "Order Cancelled" : (steps.find((step) => step.code === statusCode)?.label || "Status unavailable");
 
         document.getElementById("tracking-title").textContent = order ? `Order ${order.orderNumber || "SIDRA"}` : "Order not found";
         document.getElementById("tracking-status").textContent = status;
@@ -478,7 +486,53 @@
         document.getElementById("tracking-customer").textContent = order && order.address ? (order.address.fullName || "Customer") : "Customer";
         document.getElementById("tracking-current-status").textContent = status;
 
-        buildTimeline(status);
+        buildTimeline(statusCode);
+
+        const tracking = order?.tracking || order?.trackingInfo || null;
+        const trackingContainer = document.getElementById("tracking-information");
+        if (!tracking || !Object.values(tracking).some(Boolean)) {
+          trackingContainer.textContent = "Tracking information will be available after shipment.";
+        } else {
+          const details = [
+            ["Tracking ID", tracking.trackingId || tracking.id],
+            ["Courier / Delivery Partner", tracking.courier || tracking.deliveryPartner],
+            ["Shipment Status", tracking.shipmentStatus],
+            ["Estimated Delivery", tracking.estimatedDelivery]
+          ].filter(([, value]) => value);
+          details.forEach(([label, value]) => {
+            const line = document.createElement("p");
+            line.textContent = `${label}: ${value}`;
+            trackingContainer.appendChild(line);
+          });
+          if (tracking.trackingUrl) {
+            try {
+              const url = new URL(tracking.trackingUrl, window.location.href);
+              if (url.protocol === "https:" || url.protocol === "http:") {
+                const link = document.createElement("a");
+                link.className = "tracking-link";
+                link.href = url.href;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = "Open carrier tracking";
+                trackingContainer.appendChild(link);
+              }
+            } catch (error) {}
+          }
+        }
+
+        const history = Array.isArray(order?.statusHistory) ? order.statusHistory : [];
+        const historyList = document.getElementById("tracking-history");
+        history.forEach((entry) => {
+          const step = steps.find((item) => item.code === entry.statusCode);
+          const row = document.createElement("li");
+          const label = document.createElement("strong");
+          label.textContent = step?.label || entry.status || "Status update";
+          const time = document.createElement("time");
+          time.textContent = entry.changedAt ? new Date(entry.changedAt).toLocaleString() : "Time unavailable";
+          row.append(label, time);
+          historyList.appendChild(row);
+        });
+        document.getElementById("history-unavailable").hidden = history.length > 0;
 
         document.querySelector(".wishlist-button").addEventListener("click", () => {
           window.location.href = "wishlist.html";
