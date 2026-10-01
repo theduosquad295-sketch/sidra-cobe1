@@ -403,9 +403,10 @@ svg {
 }
 
 .toolbar-row {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  align-items: end;
+  gap: 10px;
 }
 
 .toolbar-field {
@@ -421,7 +422,8 @@ svg {
   text-transform: uppercase;
 }
 
-.toolbar-field select {
+.toolbar-field select,
+.toolbar-field input {
   width: 100%;
   min-height: 42px;
   border: 1px solid var(--line);
@@ -434,6 +436,30 @@ svg {
   letter-spacing: normal;
   text-transform: none;
   outline: none;
+}
+
+.toolbar-field input {
+  min-width: 0;
+}
+
+.price-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.clear-filters-button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.toolbar-field.is-unavailable {
+  opacity: 0.7;
 }
 
 .home-product-section {
@@ -479,6 +505,34 @@ svg {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.product-card-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.product-card-actions .button-primary {
+  grid-column: 1 / -1;
+}
+
+.button-secondary,
+.share-product-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .product-card-meta {
@@ -698,6 +752,7 @@ svg {
 
 @media (max-width: 820px) {
   .toolbar-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -724,11 +779,8 @@ svg {
     gap: 10px;
   }
 
-  .toolbar-row {
-    gap: 6px;
-  }
-
-  .toolbar-field select {
+  .toolbar-field select,
+  .toolbar-field input {
     min-height: 40px;
     padding: 0 8px;
     font-size: 0.7rem;

@@ -120,8 +120,6 @@ window.getSidraProductSlug = (name) => String(name || "")
 
 window.getSidraProductFromCard = (card) => {
   const title = card.querySelector("h3")?.textContent?.trim() || "Product";
-  const category = card.dataset.category || "Featured";
-const priceText = card.querySelector(".price")?.textContent || "₹0";
   const productId = String(card.dataset.productId || window.getSidraProductSlug(title));
   const found = window.getSidraProductById(productId) || SIDRA_PRODUCTS.find((item) => item.name === title);
 
@@ -129,21 +127,7 @@ const priceText = card.querySelector(".price")?.textContent || "₹0";
     card.dataset.productId = found.id;
     return found;
   }
-
-  const baseProduct = {
-    id: productId,
-    name: title,
-    category,
-    price: Number(String(priceText).replace(/[^0-9.]/g, "")) || 0,
-    oldPrice: null,
-    discount: "",
-    imageClass: Array.from(card.querySelector(".product-media")?.classList || []).find((className) => className.startsWith("media-")) || "media-one",
-    stock: 10,
-    description: "Premium product from the SIDRA COBE collection."
-  };
-
-  card.dataset.productId = baseProduct.id;
-  return baseProduct;
+  return null;
 };
 
 window.SIDRA_PRODUCT_IDS = SIDRA_PRODUCTS.map((item) => item.id);
@@ -428,20 +412,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getProductMetaFromCard = (card) => {
-    const title = card.querySelector("h3")?.textContent?.trim() || "Product";
-    const priceText = card.querySelector(".price")?.textContent || "₹0";
-    const imageClass = Array.from(card.querySelector(".product-media")?.classList || []).find((className) => className.startsWith("media-")) || "media-one";
-    const id = String(card.dataset.productId || title.toLowerCase().replace(/[^a-z0-9]+/g, "-")).trim();
-
-    card.dataset.productId = id;
-
-    return {
-      id,
-      name: title,
-      category: card.dataset.category || "Featured",
-      price: safeNumber(String(priceText).replace(/[^0-9.]/g, "")),
-      imageClass
-    };
+    const product = window.getSidraProductFromCard(card);
+    if (!product) return null;
+    return { ...product, id: String(product.id) };
   };
 
   const syncWishlistButtons = () => {
@@ -479,9 +452,68 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageSearchStatus = document.getElementById("image-search-status");
   const homeSortSelect = document.getElementById("sort-select");
   const homeCategorySelect = document.getElementById("category-select");
-  const homeFilterSelect = document.getElementById("filter-select");
+  const homeAvailabilitySelect = document.getElementById("availability-filter");
+  const homeSizeSelect = document.getElementById("size-filter");
+  const homeColorSelect = document.getElementById("color-filter");
+  const homeRatingSelect = document.getElementById("rating-filter");
+  const homeBrandSelect = document.getElementById("brand-filter");
+  const homePriceMin = document.getElementById("price-min");
+  const homePriceMax = document.getElementById("price-max");
+  const clearFiltersButton = document.getElementById("clear-filters-button");
   const homeProductCards = Array.from(document.querySelectorAll(".product-card"));
   const homeEmptyState = document.querySelector(".home-empty-state");
+
+  const products = (window.SIDRA_PRODUCTS || []).filter(Boolean);
+  homeCategorySelect?.querySelectorAll("option:not([value='all'])").forEach((option) => {
+    const hasProducts = products.some((product) => (product.category || "").toLowerCase() === option.value.toLowerCase());
+    option.textContent = hasProducts ? option.value : `${option.value} (no products)`;
+  });
+  const getProductValues = (product, keys) => keys.flatMap((key) => {
+    const value = product[key];
+    return Array.isArray(value) ? value : value == null || value === "" ? [] : [value];
+  }).map((value) => String(typeof value === "object" ? value.name || value.color || "" : value).trim()).filter(Boolean);
+  const populateFacet = (select, values, unavailableLabel) => {
+    if (!select) return;
+    const uniqueValues = [...new Set(values)].sort((a, b) => a.localeCompare(b));
+    select.replaceChildren(new Option("All", "all"));
+    if (!uniqueValues.length) {
+      select.add(new Option(unavailableLabel, "unavailable"));
+      select.disabled = true;
+      select.closest(".toolbar-field")?.classList.add("is-unavailable");
+      return;
+    }
+    uniqueValues.forEach((value) => select.add(new Option(value, value)));
+    select.disabled = false;
+    select.closest(".toolbar-field")?.classList.remove("is-unavailable");
+  };
+
+  populateFacet(homeSizeSelect, products.flatMap((product) => getProductValues(product, ["sizes", "size"])), "No sizes in catalog");
+  populateFacet(homeColorSelect, products.flatMap((product) => getProductValues(product, ["colors", "color", "variants"])), "No colors in catalog");
+  if (homeRatingSelect) {
+    const ratingThresholds = [4, 3, 2].filter((threshold) => products.some((product) => safeNumber(product.rating) >= threshold));
+    homeRatingSelect.replaceChildren(new Option("All", "all"));
+    ratingThresholds.forEach((threshold) => homeRatingSelect.add(new Option(`${threshold}★ & above`, String(threshold))));
+    homeRatingSelect.disabled = ratingThresholds.length === 0;
+    if (!ratingThresholds.length) homeRatingSelect.add(new Option("Ratings unavailable", "unavailable"));
+    homeRatingSelect.closest(".toolbar-field")?.classList.toggle("is-unavailable", !ratingThresholds.length);
+  }
+  const catalogBrands = products.map((product) => getProductValues(product, ["brand"])[0] || "SIDRA COBE");
+  populateFacet(homeBrandSelect, catalogBrands, "No brands in catalog");
+
+  if (homeSortSelect) {
+    const hasCreatedDate = products.some((product) => product.createdAt || product.created_at || product.createdDate || product.dateAdded);
+    const hasPopularity = products.some((product) => [product.popularity, product.sales, product.views, product.rating].some((value) => Number.isFinite(Number(value))));
+    const newestOption = homeSortSelect.querySelector('[value="newest"]');
+    const popularOption = homeSortSelect.querySelector('[value="popular"]');
+    if (newestOption) {
+      newestOption.disabled = !hasCreatedDate;
+      newestOption.textContent = hasCreatedDate ? "Newest" : "Newest (date unavailable)";
+    }
+    if (popularOption) {
+      popularOption.disabled = !hasPopularity;
+      popularOption.textContent = hasPopularity ? "Popular" : "Popular (data unavailable)";
+    }
+  }
 
   const setVoiceStatus = (message, isListening = false) => {
     if (!voiceSearchStatus) return;
@@ -499,24 +531,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const query = (homeSearchInput?.value || "").trim().toLowerCase();
     const categoryValue = homeCategorySelect?.value || "all";
-    const filterValue = homeFilterSelect?.value || "all";
     const sortValue = homeSortSelect?.value || "featured";
+    const minPrice = homePriceMin?.value === "" ? null : safeNumber(homePriceMin?.value);
+    const maxPrice = homePriceMax?.value === "" ? null : safeNumber(homePriceMax?.value);
     const terms = query.split(/\s+/).filter(Boolean);
 
     const filteredCards = homeProductCards.filter((card) => {
       const product = window.getSidraProductFromCard(card);
+      if (!product) return false;
       const searchableText = [product.name, product.category, product.description, ...(product.keywords || [])]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
       const searchMatches = terms.every((term) => searchableText.includes(term));
-      const category = (product.category || "").toLowerCase();
-      const categoryMatches = categoryValue === "all" || category === categoryValue.toLowerCase();
-      const filterMatches =
-        filterValue === "all" ||
-        (filterValue === "under-100" ? product.price < 100 : product.price >= 100);
+      const categoryMatches = categoryValue === "all" || (product.category || "").toLowerCase() === categoryValue.toLowerCase();
+      const availability = homeAvailabilitySelect?.value || "all";
+      const stock = Number(product.stock);
+      const availabilityMatches = availability === "all" || (availability === "in-stock" ? stock > 0 : stock <= 0);
+      const sizeMatches = !homeSizeSelect || homeSizeSelect.value === "all" || getProductValues(product, ["sizes", "size"]).includes(homeSizeSelect.value);
+      const colorMatches = !homeColorSelect || homeColorSelect.value === "all" || getProductValues(product, ["colors", "color", "variants"]).includes(homeColorSelect.value);
+      const ratingThreshold = homeRatingSelect?.value === "all" ? 0 : safeNumber(homeRatingSelect?.value);
+      const ratingMatches = !ratingThreshold || safeNumber(product.rating) >= ratingThreshold;
+      const brand = getProductValues(product, ["brand"])[0] || "SIDRA COBE";
+      const brandMatches = !homeBrandSelect || homeBrandSelect.value === "all" || brand === homeBrandSelect.value;
+      const priceMatches = (minPrice === null || safeNumber(product.price) >= minPrice) && (maxPrice === null || safeNumber(product.price) <= maxPrice);
 
-      return searchMatches && categoryMatches && filterMatches;
+      return searchMatches && categoryMatches && availabilityMatches && sizeMatches && colorMatches && ratingMatches && brandMatches && priceMatches;
     });
 
     const sorted = [...filteredCards].sort((cardA, cardB) => {
@@ -525,6 +565,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (sortValue === "price-low") return productA.price - productB.price;
       if (sortValue === "price-high") return productB.price - productA.price;
+      if (sortValue === "newest") {
+        const dateA = new Date(productA.createdAt || productA.created_at || productA.createdDate || productA.dateAdded || 0).getTime();
+        const dateB = new Date(productB.createdAt || productB.created_at || productB.createdDate || productB.dateAdded || 0).getTime();
+        return dateB - dateA;
+      }
+      if (sortValue === "popular") {
+        const score = (product) => safeNumber(product.popularity ?? product.sales ?? product.views ?? product.rating);
+        return score(productB) - score(productA);
+      }
       return 0;
     });
 
@@ -665,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.appendChild(toast);
     }
 
-    toast.textContent = "Added to Cart";
+    toast.textContent = showAddedToast.message || "Added to Cart";
     toast.style.opacity = "1";
     toast.style.transform = "translateY(0)";
 
@@ -674,6 +723,45 @@ document.addEventListener("DOMContentLoaded", () => {
       toast.style.opacity = "0";
       toast.style.transform = "translateY(10px)";
     }, 1200);
+  };
+
+  const showToast = (message) => {
+    showAddedToast.message = message;
+    showAddedToast();
+    showAddedToast.message = "Added to Cart";
+  };
+
+  const copyToClipboard = async (value) => {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch (error) { }
+    }
+    const field = document.createElement("textarea");
+    field.value = value;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    const copied = document.execCommand("copy");
+    field.remove();
+    return copied;
+  };
+
+  const shareProduct = async (product) => {
+    const url = new URL("pages/product.html", window.location.href);
+    url.searchParams.set("id", product.id);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product.name, url: url.href });
+        return;
+      } catch (error) {
+        if (error.name === "AbortError") return;
+      }
+    }
+    showToast(await copyToClipboard(url.href) ? "Product link copied" : "Could not copy product link");
   };
 
   if (voiceSearchButton) {
@@ -883,7 +971,6 @@ document.addEventListener("DOMContentLoaded", () => {
   browseCategoriesButton?.addEventListener("click", () => {
     homeSearchInput.value = "";
     if (homeCategorySelect) homeCategorySelect.value = "all";
-    if (homeFilterSelect) homeFilterSelect.value = "all";
     applyHomeFilters();
     homeCategorySelect?.scrollIntoView({ behavior: "smooth", block: "center" });
     homeCategorySelect?.focus();
@@ -896,11 +983,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  [homeSortSelect, homeCategorySelect, homeFilterSelect].forEach((control) => {
+  [homeSortSelect, homeCategorySelect, homeAvailabilitySelect, homeSizeSelect, homeColorSelect, homeRatingSelect, homeBrandSelect, homePriceMin, homePriceMax].forEach((control) => {
     if (control) {
       control.addEventListener("input", applyHomeFilters);
       control.addEventListener("change", applyHomeFilters);
     }
+  });
+
+  clearFiltersButton?.addEventListener("click", () => {
+    if (homeSearchInput) homeSearchInput.value = "";
+    if (homeSortSelect) homeSortSelect.value = "featured";
+    if (homeCategorySelect) homeCategorySelect.value = "all";
+    [homeAvailabilitySelect, homeSizeSelect, homeColorSelect, homeRatingSelect, homeBrandSelect].forEach((select) => {
+      if (select) select.value = "all";
+    });
+    if (homePriceMin) homePriceMin.value = "";
+    if (homePriceMax) homePriceMax.value = "";
+    applyHomeFilters();
   });
 
   document.querySelectorAll(".wishlist-button").forEach((button) => {
@@ -944,6 +1043,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".product-card").forEach((card) => {
     const product = window.getSidraProductFromCard(card);
+    if (!product) {
+      card.hidden = true;
+      return;
+    }
     const productId = String(product.id);
     card.dataset.productId = productId;
     card.dataset.category = product.category || card.dataset.category || "Featured";
@@ -969,11 +1072,16 @@ document.addEventListener("DOMContentLoaded", () => {
       event.stopPropagation();
 
       const productMeta = window.getSidraProductFromCard(card);
+      if (!productMeta) return;
       const title = productMeta.name;
       const priceValue = safeNumber(productMeta.price);
       const productIdValue = String(productMeta.id);
       const cart = readCart();
       const existingItem = cart.find((item) => String(item.id) === String(productIdValue));
+      if (safeNumber(productMeta.stock) < 1 || (existingItem && safeNumber(existingItem.quantity) >= safeNumber(productMeta.stock))) {
+        showToast("This product is out of stock");
+        return;
+      }
 
       if (existingItem) {
         existingItem.quantity = safeNumber(existingItem.quantity) + 1;
@@ -1008,6 +1116,7 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         event.stopPropagation();
         const productMeta = window.getSidraProductFromCard(card);
+        if (!productMeta) return;
         const productPayload = {
           id: productMeta.id,
           name: productMeta.name,
@@ -1016,13 +1125,25 @@ document.addEventListener("DOMContentLoaded", () => {
           oldPrice: productMeta.oldPrice,
           discount: productMeta.discount,
           imageClass: productMeta.imageClass,
-          stock: productMeta.stock || 10,
+          stock: productMeta.stock,
           description: productMeta.description
         };
         localStorage.setItem("sidraCobeBuyNow", JSON.stringify({ product: productPayload, quantity: 1 }));
         window.location.href = "pages/checkout.html";
       });
     }
+
+    card.querySelector(".share-product-button")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      shareProduct(product);
+    });
+
+    card.querySelector(".detail-link")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.location.href = "pages/product.html?id=" + encodeURIComponent(productId);
+    });
   });
 
   updateCartCounts();

@@ -383,7 +383,7 @@
           if (!match) return;
 
           const product = window.getSidraProductById ? window.getSidraProductById(match.id) : null;
-          const needsSize = String(product?.category || match.category).toLowerCase() === "clothing";
+          const needsSize = Array.isArray(product?.sizes) && product.sizes.length > 0;
           const needsVariant = Array.isArray(product?.variants) && product.variants.length > 0;
           if ((needsSize && !match.size) || (needsVariant && !match.variant)) {
             document.getElementById("wishlist-feedback").textContent = "Choose the required size or variant on the product page before adding this item.";

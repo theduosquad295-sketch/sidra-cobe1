@@ -833,7 +833,7 @@
               if (!Number.isInteger(item.quantity) || item.quantity < 1 || (item.stock !== null && item.quantity > item.stock)) {
                 document.getElementById("checkout-error").textContent = "Check product quantities against current stock.";
                 valid = false;
-              } else if (String(product.category || "").toLowerCase() === "clothing" && !["S", "M", "L", "XL", "XXL"].includes(item.size)) {
+              } else if (Array.isArray(product.sizes) && product.sizes.length && !product.sizes.map(String).includes(item.size)) {
                 document.getElementById("checkout-error").textContent = `Select a size for ${product.name} on its product page.`;
                 valid = false;
               } else {

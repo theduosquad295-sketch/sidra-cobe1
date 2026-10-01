@@ -121,6 +121,8 @@
                 <option value="featured">Featured</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
+                <option value="newest">Newest</option>
+                <option value="popular">Popular</option>
               </select>
             </label>
 
@@ -128,21 +130,34 @@
               <span data-i18n="category">Category</span>
               <select id="category-select">
                 <option value="all">All</option>
+                <option value="T-Shirts">T-Shirts</option>
+                <option value="Shirts">Shirts</option>
+                <option value="Jeans">Jeans</option>
+                <option value="Pants / Lower">Pants / Lower</option>
                 <option value="Clothing">Clothing</option>
                 <option value="Shoes">Shoes</option>
                 <option value="Bags">Bags</option>
+                <option value="Sunglasses">Sunglasses</option>
                 <option value="Accessories">Accessories</option>
               </select>
             </label>
 
-            <label class="toolbar-field" for="filter-select">
-              <span data-i18n="filter">Filter</span>
-              <select id="filter-select">
-                <option value="all">All</option>
-                <option value="under-100">Under ₹100</option>
-                <option value="over-100">₹100 &amp; above</option>
-              </select>
+            <label class="toolbar-field" for="price-min">
+              <span>Price (₹)</span>
+              <span class="price-range">
+                <input id="price-min" type="number" min="0" step="1" placeholder="Min" aria-label="Minimum price in rupees" />
+                <input id="price-max" type="number" min="0" step="1" placeholder="Max" aria-label="Maximum price in rupees" />
+              </span>
             </label>
+            <label class="toolbar-field" for="availability-filter">
+              <span>Availability</span>
+              <select id="availability-filter"><option value="all">All</option><option value="in-stock">In Stock</option><option value="out-of-stock">Out of Stock</option></select>
+            </label>
+            <label class="toolbar-field" for="size-filter"><span>Size</span><select id="size-filter"><option value="all">All</option></select></label>
+            <label class="toolbar-field" for="color-filter"><span>Color</span><select id="color-filter"><option value="all">All</option></select></label>
+            <label class="toolbar-field" for="rating-filter"><span>Rating</span><select id="rating-filter"><option value="all">All</option></select></label>
+            <label class="toolbar-field" for="brand-filter"><span>Brand</span><select id="brand-filter"><option value="all">All</option></select></label>
+            <button id="clear-filters-button" class="clear-filters-button" type="button">Clear All</button>
           </div>
         </section>
 
@@ -162,8 +177,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹89</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Urban Lite Jacket">Share</button></div>
               </div>
             </article>
 
@@ -181,8 +196,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹120</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Summit Runner">Share</button></div>
               </div>
             </article>
 
@@ -200,8 +215,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹74</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Harbor Tote">Share</button></div>
               </div>
             </article>
 
@@ -219,8 +234,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹58</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Vela Shades">Share</button></div>
               </div>
             </article>
 
@@ -238,8 +253,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹96</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Coastline Hoodie">Share</button></div>
               </div>
             </article>
 
@@ -257,8 +272,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹110</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Northbound Bag">Share</button></div>
               </div>
             </article>
 
@@ -276,8 +291,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹132</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share Metro Sneaker">Share</button></div>
               </div>
             </article>
 
@@ -295,8 +310,8 @@
                 </div>
                 <div class="product-card-footer">
                   <div class="product-price"><span class="price">₹86</span></div>
-                  <button class="button-primary" type="button">Add to Cart</button>
                 </div>
+                <div class="product-card-actions"><button class="button-primary" type="button">Add to Cart</button><button class="button-secondary" type="button">Buy Now</button><button class="share-product-button" type="button" aria-label="Share City Accent Watch">Share</button></div>
               </div>
             </article>
           </div>

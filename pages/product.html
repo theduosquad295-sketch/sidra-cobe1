@@ -382,9 +382,9 @@
             <div id="product-category" class="detail-category">Category</div>
             <h1 id="product-name">Product Name</h1>
 
-            <div class="rating-row">
-              <span class="stars">★★★★★</span>
-              <span>4.8</span>
+            <div class="rating-row" hidden>
+              <span class="stars"></span>
+              <span id="rating-value"></span>
             </div>
 
             <div class="price-row">
@@ -479,29 +479,6 @@
         const STORAGE_KEYS = ["sidraCobeCart", "sidraCart", "sidra-cobe-cart", "cartData"];
         const WISHLIST_KEY = "sidraCobeWishlist";
         const BUY_NOW_KEY = "sidraCobeBuyNow";
-        const CATEGORY_IMAGES = {
-          "Clothing": [
-            "../images/products/shirt1.jpg",
-            "../images/products/hoodie1.jpg",
-            "../images/products/tshirt1.jpg"
-          ],
-          "Shoes": [
-            "../images/products/shoes1.jpg",
-            "../images/products/tshirt1.jpg",
-            "../images/products/watch1.jpg"
-          ],
-          "Bags": [
-            "../images/products/bag1.jpg",
-            "../images/products/ladies-purse1.jpg",
-            "../images/products/watch1.jpg"
-          ],
-          "Accessories": [
-            "../images/products/sunglasses1.jpg",
-            "../images/products/watch1.jpg",
-            "../images/products/bag1.jpg"
-          ]
-        };
-
         function safeNumber(value) {
           const parsed = Number(value);
           return Number.isFinite(parsed) ? parsed : 0;
@@ -586,10 +563,9 @@
         }
 
         function getGalleryPaths(product) {
-          const category = product.category || "Featured";
           const basePath = window.getSidraImagePath ? window.getSidraImagePath(product.imageClass) : "../images/products/shirt1.jpg";
-          const preferred = CATEGORY_IMAGES[category] || [basePath];
-          const all = [basePath, ...preferred, "../images/products/shirt1.jpg", "../images/products/shoes1.jpg", "../images/products/ladies-purse1.jpg", "../images/products/sunglasses1.jpg", "../images/products/hoodie1.jpg", "../images/products/bag1.jpg", "../images/products/tshirt1.jpg", "../images/products/watch1.jpg"];
+          const variantImages = (Array.isArray(product.variants) ? product.variants : []).map((variant) => variant.image).filter(Boolean);
+          const all = [basePath, ...(Array.isArray(product.images) ? product.images : []), ...variantImages];
           const unique = [];
           const seen = new Set();
 
@@ -612,7 +588,7 @@
           if (product.category) {
             entries.push(`Category: ${product.category}`);
           }
-          if (product.stock) {
+          if (Number.isFinite(Number(product.stock))) {
             entries.push(stock > 0 ? `Availability: ${stock} units left` : "Availability: Out of stock");
           } else {
             entries.push("Availability: Stock information is currently unavailable.");
@@ -652,7 +628,7 @@
           const productPrice = safeNumber(product.price);
           const oldPrice = safeNumber(product.oldPrice || 0);
           const stock = safeNumber(product.stock || 0);
-          const isClothing = String(product.category || "").toLowerCase() === "clothing";
+          const productSizes = Array.isArray(product.sizes) ? product.sizes.map(String) : [];
           const isOutOfStock = stock <= 0;
           let selectedSize = null;
           let selectedVariant = null;
@@ -696,6 +672,10 @@
           const mainImage = document.getElementById("gallery-main-image");
           const galleryThumbs = document.getElementById("gallery-thumbs");
           let activeIndex = 0;
+          const hasMultipleImages = galleryPaths.length > 1;
+          document.getElementById("gallery-prev").style.display = hasMultipleImages ? "" : "none";
+          document.getElementById("gallery-next").style.display = hasMultipleImages ? "" : "none";
+          galleryThumbs.style.display = hasMultipleImages ? "" : "none";
 
           function renderThumbs() {
             galleryThumbs.innerHTML = galleryPaths.map((src, index) => `
@@ -727,10 +707,9 @@
 
           const sizeWrap = document.getElementById("size-selector-wrap");
           const sizeOptions = document.getElementById("size-options");
-          if (isClothing) {
+          if (productSizes.length) {
             sizeWrap.hidden = false;
-            const sizes = ["S", "M", "L", "XL", "XXL"];
-            sizeOptions.innerHTML = sizes.map((size) => `
+            sizeOptions.innerHTML = productSizes.map((size) => `
               <button type="button" class="chip" data-size="${size}" aria-label="Select size ${size}">${size}</button>
             `).join("");
 
@@ -800,8 +779,12 @@
           }
 
           document.getElementById("add-to-cart").addEventListener("click", () => {
-            if (isClothing && !selectedSize) {
+            if (productSizes.length && !selectedSize) {
               showError("Please select a size before adding this item to cart.");
+              return;
+            }
+            if (productVariants.length && !selectedVariant) {
+              showError("Please select a color or variant before adding this item to cart.");
               return;
             }
             if (isOutOfStock) {
@@ -815,6 +798,10 @@
 
             const cart = readCart();
             const existing = cart.find((item) => String(item.id) === String(product.id) && (item.size || "") === (selectedSize || "") && (item.variant || "") === (selectedVariant || ""));
+            if (existing && safeNumber(existing.quantity) + quantity > maxQty) {
+              showError("The requested quantity exceeds available stock.");
+              return;
+            }
             if (existing) {
               existing.quantity = safeNumber(existing.quantity) + quantity;
             } else {
@@ -840,8 +827,12 @@
           });
 
           document.getElementById("buy-now").addEventListener("click", () => {
-            if (isClothing && !selectedSize) {
+            if (productSizes.length && !selectedSize) {
               showError("Please select a size before continuing to checkout.");
+              return;
+            }
+            if (productVariants.length && !selectedVariant) {
+              showError("Please select a color or variant before continuing to checkout.");
               return;
             }
             if (isOutOfStock) {
@@ -894,7 +885,9 @@
               name: product.name,
               category: product.category || "Featured",
               price: productPrice,
-              imageClass: product.imageClass || "media-one"
+                imageClass: product.imageClass || "media-one",
+                size: selectedSize || "",
+                variant: selectedVariant || ""
             }];
             saveWishlist(nextItems);
             updateCounts();
@@ -903,28 +896,47 @@
           syncWishlistButton();
 
           document.getElementById("share-product").addEventListener("click", async () => {
-            const shareUrl = `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(product.id)}`;
-            const shareText = `${product.name} - ${formatCurrency(productPrice)} | SIDRA COBE`;
+            const shareUrl = new URL(window.location.href);
+            shareUrl.search = "";
+            shareUrl.searchParams.set("id", product.id);
             if (navigator.share) {
               try {
-                await navigator.share({ title: product.name, text: shareText, url: shareUrl });
+                await navigator.share({ title: product.name, url: shareUrl.href });
                 return;
               } catch (error) {
-                // Fall back to clipboard when user cancels.
+                if (error.name === "AbortError") return;
               }
             }
             if (navigator.clipboard) {
               try {
-                await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                await navigator.clipboard.writeText(shareUrl.href);
                 document.getElementById("product-error").textContent = "Product link copied to clipboard.";
                 document.getElementById("product-error").classList.add("error-visible");
                 return;
               } catch (error) {
-                // Continue to fallback below.
               }
             }
-            window.prompt("Copy this product link:", `${shareText} ${shareUrl}`);
+            const copyField = document.createElement("textarea");
+            copyField.value = shareUrl.href;
+            copyField.setAttribute("readonly", "");
+            copyField.style.position = "fixed";
+            copyField.style.opacity = "0";
+            document.body.appendChild(copyField);
+            copyField.select();
+            const copied = document.execCommand("copy");
+            copyField.remove();
+            document.getElementById("product-error").textContent = copied ? "Product link copied" : "Could not copy product link";
+            document.getElementById("product-error").classList.add("error-visible");
           });
+
+          const ratingRow = document.querySelector(".rating-row");
+          const rating = Number(product.rating);
+          ratingRow.style.display = "none";
+          if (Number.isFinite(rating) && rating > 0) {
+            document.getElementById("rating-value").textContent = rating.toFixed(1);
+            document.querySelector(".rating-row .stars").textContent = `${"★".repeat(Math.floor(rating))}${"☆".repeat(5 - Math.floor(rating))}`;
+            ratingRow.style.display = "flex";
+          }
 
           renderFeatures(product);
           populateInfoList(product, stock);
